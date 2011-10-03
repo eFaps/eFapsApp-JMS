@@ -321,7 +321,7 @@
                     <passWord>Administrator</passWord>
                     <!-- used from the generateUUID goal -->
                     <count>${count}</count>
-                    <ciName>Logback</ciName>
+                    <ciName>jms</ciName>
                 </configuration>
                 <dependencies>
                     <!-- Connection Pooling -->
@@ -331,6 +331,75 @@
                         <version>1.4</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.sun.tools.jxc.maven2</groupId>
+                <artifactId>maven-jaxb-schemagen-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <project>${project}</project>
+                    <destdir>${project.build.directory}/generated-resources/schemas</destdir>
+                    <srcdir>src/main/efaps/ESJP/org/efaps/esjp/jms</srcdir>
+                    <verbose>true</verbose>
+                </configuration>
+                <!--
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>1.3.1</version>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>schemagen</goal>
+                        </goals>
+                    </execution>
+               </executions>
+               <configuration>
+                    <outputDirectory>${project.build.directory}/generated-resources/schemas</outputDirectory>
+                    <includes>
+                        <include>*.java</include>
+                    </includes>
+               </configuration>-->
+                <dependencies>
+                    <dependency>
+                        <groupId>javax.xml.bind</groupId>
+                        <artifactId>jaxb-api</artifactId>
+                        <version>2.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-xjc</artifactId>
+                        <version>2.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-impl</artifactId>
+                        <version>2.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.sun.xml.bind</groupId>
+                        <artifactId>jaxb-xjc</artifactId>
+                        <version>2.2</version>
+                    </dependency>
+               </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.10</version>
+                <configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>${basedir}/src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -350,6 +419,19 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>0.9.26</version>
+        </dependency>
+
+         <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.2.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.10.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
