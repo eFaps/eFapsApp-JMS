@@ -295,6 +295,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
+                   <verbose>true</verbose>
                     <source>1.6</source>
                     <target>1.6</target>
                     <encoding>UTF-8</encoding>
@@ -307,7 +308,7 @@
             <plugin>
                 <groupId>org.efaps</groupId>
                 <artifactId>maven-efaps-plugin</artifactId>
-                <version>2.18.0-7.4.3.v20110701</version>
+                <version>2.19.0-7.4.3.v20110701</version>
                 <executions>
                     <execution>
                         <goals>
@@ -408,17 +409,111 @@
             <version>1.1</version>
         </dependency>
 
+
+                    <dependency>
+                        <groupId>org.efaps</groupId>
+                        <artifactId>efaps-kernel</artifactId>
+                        <version>1.19.0</version>
+                        <type>test-jar</type>
+                        <scope>test</scope>
+                    </dependency>
+
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.2.1</version>
-            <scope>test</scope>
+
         </dependency>
+
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>2.10.0</version>
             <scope>test</scope>
         </dependency>
-    </dependencies>
+        <!--
+            used as javax.naming.* implementation
+            (needed to connect to eFaps database)
+        -->
+         <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-jndi</artifactId>
+            <version>7.0.1.v20091125</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.mail</groupId>
+                    <artifactId>mail</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+         <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>7.0.1.v20091125</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>7.0.1.v20091125</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- java transaction manager -->
+        <dependency>
+            <groupId>jotm</groupId>
+            <artifactId>jotm</artifactId>
+            <version>2.0.10</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.resource</groupId>
+                    <artifactId>connector-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+         <!-- replacement for the javax.resource.connector-api-1.5 needed by jotm-->
+        <dependency>
+            <groupId>org.ow2.spec.ee</groupId>
+            <artifactId>ow2-connector-1.5-spec</artifactId>
+            <version>1.0.9</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Needed indirectly for the transaction manager -->
+        <dependency>
+            <groupId>javax.resource</groupId>
+            <artifactId>connector</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- connection Pooling, used as J2EE resource -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+            <scope>test</scope>
+        </dependency>
+<dependency>
+    <groupId>org.hornetq</groupId>
+    <artifactId>hornetq-core</artifactId>
+    <version>2.2.7.Final</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.hornetq</groupId>
+    <artifactId>hornetq-jms</artifactId>
+    <version>2.2.7.Final</version>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.jboss.netty</groupId>
+    <artifactId>netty</artifactId>
+    <version>3.2.5.Final</version>
+    <scope>test</scope>
+</dependency>
+        </dependencies>
 </project>

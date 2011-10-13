@@ -3,7 +3,7 @@
 <suite name="org.efaps.test.jms" parallel="none">
     <test name="Contacts" preserve-order="false">
         <classes>
-            <class name="org.efaps.test.jms.Contacts"></class>
+            <class name="org.efaps.jms.test.Contacts"></class>
         </classes>
     </test>
 </suite>

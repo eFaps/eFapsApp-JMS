@@ -21,6 +21,9 @@
 
 package org.efaps.esjp.jms.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 
 /**
  * TODO comment!
@@ -28,6 +31,7 @@ package org.efaps.esjp.jms.annotation;
  * @author The eFaps Team
  * @version $Id$
  */
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Type
 {
     /**

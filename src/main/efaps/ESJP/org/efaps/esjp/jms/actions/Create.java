@@ -20,10 +20,18 @@
 
 package org.efaps.esjp.jms.actions;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+
+import org.efaps.esjp.jms.AbstractObject;
+import org.efaps.esjp.jms.annotation.Attribute;
+import org.efaps.esjp.jms.annotation.Type;
+import org.efaps.util.EFapsException;
 
 /**
  * TODO comment!
@@ -37,5 +45,35 @@ import javax.xml.bind.annotation.XmlType;
 public class Create
     extends AbstractAction
 {
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void execute()
+        throws EFapsException
+    {
+        for (final AbstractObject object : getObjects()) {
+            final Type typeAnno = object.getClass().getAnnotation(Type.class);
+            if (typeAnno != null) {
+                System.out.println(typeAnno.uuid());
+            }
+            final Method[] methods = object.getClass().getDeclaredMethods();
+            for (final Method method : methods) {
+                System.out.println(method.getName());
+                final Attribute attributeAnno = method.getAnnotation(Attribute.class);
+                if (attributeAnno != null) {
+                    try {
+                        final Object x = method.invoke(object);
+                        System.out.println(attributeAnno.name() + "-" + x);
+                    } catch (final IllegalArgumentException e) {
+                        throw new EFapsException("IllegalArgumentException", e);
+                    } catch (final IllegalAccessException e) {
+                        throw new EFapsException("IllegalAccessException", e);
+                    } catch (final InvocationTargetException e) {
+                        throw new EFapsException("InvocationTargetException", e);
+                    }
+                }
+            }
+        }
+    }
 }

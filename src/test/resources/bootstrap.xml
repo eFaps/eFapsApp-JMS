@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+  <comment>This is the bootstrap to connect to an eFaps database</comment>
+
+  <!--
+    This property configures the database type. The value is a name of a class
+    derived from org.efaps.db.database.AbstractDatabase. Currently, two class
+    names could be used:
+      - org.efaps.db.databases.DerbyDatabase
+      - org.efaps.db.databases.OracleDatabase
+      - org.efaps.db.databases.PostgreSQLDatabase
+    The information is needed to implement the vendor specific database
+    functionality (e.g. a delete of all or table column types).
+  -->
+  <entry key="org.efaps.db.type">org.efaps.db.databases.PostgreSQLDatabase</entry>
+
+  <!--
+    This parameter defines the database user name.
+  -->
+  <entry key="org.efaps.db.factory">org.apache.commons.dbcp.BasicDataSourceFactory</entry>
+
+  <!--
+    This parameter defines the password of the database user name.
+  -->
+  <entry key="org.efaps.db.connection">username = efaps,
+password = efaps,
+driverClassName = org.postgresql.Driver,
+url = jdbc:postgresql://127.0.0.1:5432/efaps,
+factory = org.apache.commons.dbcp.BasicDataSourceFactory,
+maxActive = 100,
+maxIdle = 10,
+maxWait = -1,
+removeAbandoned = true,
+logAbandoned = true</entry>
+
+  <!--
+    This is the database JDBC driver class mame. The value should not be
+    changed.
+  -->
+  <entry key="org.efaps.transaction.manager">org.objectweb.jotm.Current</entry>
+
+  <entry key="org.efaps.transaction.timeout">9000</entry>
+
+
+
+</properties>

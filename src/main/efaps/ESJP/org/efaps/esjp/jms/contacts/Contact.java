@@ -32,6 +32,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.efaps.esjp.jms.AbstractObject;
+import org.efaps.esjp.jms.annotation.Attribute;
 import org.efaps.esjp.jms.annotation.Type;
 
 /**
@@ -47,7 +48,6 @@ import org.efaps.esjp.jms.annotation.Type;
 public class Contact
     extends AbstractObject
 {
-
     @XmlElement(name = "name", required = true)
     private String name;
 
@@ -57,6 +57,17 @@ public class Contact
     })
     @XmlElementWrapper
     private final ArrayList<AbstractClassification> classifications = new ArrayList<AbstractClassification>();
+
+    /**
+     * Getter method for the instance variable {@link #name}.
+     *
+     * @return value of instance variable {@link #name}
+     */
+    @Attribute(name = "Name")
+    public String getName()
+    {
+        return this.name;
+    }
 
     @Override
     public String toString()

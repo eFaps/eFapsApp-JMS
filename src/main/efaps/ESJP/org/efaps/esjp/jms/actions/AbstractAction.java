@@ -32,6 +32,7 @@ import org.efaps.esjp.jms.AbstractObject;
 import org.efaps.esjp.jms.contacts.Contact;
 import org.efaps.esjp.jms.products.StandartProduct;
 import org.efaps.esjp.jms.sales.Invoice;
+import org.efaps.util.EFapsException;
 
 
 /**
@@ -49,5 +50,22 @@ public abstract class AbstractAction
         @XmlElement(name="standartproduct", type = StandartProduct.class)
     })
     @XmlElementWrapper
-    ArrayList<AbstractObject> objects = new ArrayList<AbstractObject>();
+    private final ArrayList<AbstractObject> objects = new ArrayList<AbstractObject>();
+
+
+    /**
+     * Execute the action.
+     * @throws EFapsException on error
+     */
+    public abstract void execute() throws EFapsException;
+
+    /**
+     * Getter method for the instance variable {@link #objects}.
+     *
+     * @return value of instance variable {@link #objects}
+     */
+    protected ArrayList<AbstractObject> getObjects()
+    {
+        return this.objects;
+    }
 }

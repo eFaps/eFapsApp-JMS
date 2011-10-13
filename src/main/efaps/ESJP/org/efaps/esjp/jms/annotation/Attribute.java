@@ -19,7 +19,10 @@
  */
 
 
-package org.efaps.test.jms;
+package org.efaps.esjp.jms.annotation;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 
 /**
@@ -28,7 +31,11 @@ package org.efaps.test.jms;
  * @author The eFaps Team
  * @version $Id$
  */
-public class AbstractTest
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Attribute
 {
-
+    /**
+     * @return name of the Attribute
+     */
+    String name();
 }
