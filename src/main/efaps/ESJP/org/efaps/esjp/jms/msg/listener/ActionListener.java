@@ -22,13 +22,14 @@
 package org.efaps.esjp.jms.msg.listener;
 
 import java.io.StringReader;
+import java.io.StringWriter;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
@@ -45,15 +46,16 @@ import org.efaps.util.EFapsException;
  * @version $Id$
  */
 public class ActionListener
-    implements MessageListener
+    extends  AbstractContextListener
 {
 
-    /* (non-Javadoc)
-     * @see javax.jms.MessageListener#onMessage(javax.jms.Message)
+    /**
+     * {@inheritDoc}
      */
     @Override
-    public void onMessage(final Message _msg)
+    public Object onSessionMessage(final Message _msg)
     {
+        Object object = null;
         try {
             if (_msg instanceof TextMessage) {
                 final TextMessage msg = (TextMessage) _msg;
@@ -62,16 +64,11 @@ public class ActionListener
                 final JAXBContext jc = JAXBContext.newInstance(Create.class);
                 final Unmarshaller unmarschaller = jc.createUnmarshaller();
                 final Source source = new StreamSource(new StringReader(xml));
-                final Object object = unmarschaller.unmarshal(source);
+                object = unmarschaller.unmarshal(source);
 
                 if (object instanceof AbstractAction) {
                     final AbstractAction action = (AbstractAction) object;
                     action.execute();
-                }
-                System.out.println(object);
-                final String correlationID = _msg.getJMSCorrelationID();
-                if (correlationID != null) {
-
                 }
             }
         } catch (final JMSException e) {
@@ -84,5 +81,29 @@ public class ActionListener
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        return object;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @throws JMSException
+     */
+    @Override
+    protected void respondSessionMessage(final TextMessage _msg,
+                                         final Object _object)
+        throws JMSException
+    {
+        try {
+            final JAXBContext jc = JAXBContext.newInstance(Create.class);
+            final Marshaller marschaller = jc.createMarshaller();
+            marschaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+            final StringWriter xml = new StringWriter();
+            marschaller.marshal(_object, xml);
+            _msg.setText(xml.toString());
+        } catch (final JAXBException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 }

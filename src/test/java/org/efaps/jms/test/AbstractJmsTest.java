@@ -21,12 +21,27 @@
 package org.efaps.jms.test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 
+import org.efaps.admin.runlevel.RunLevel;
+import org.efaps.db.Context;
+import org.efaps.esjp.jms.msg.listener.AbstractContextListener;
+import org.efaps.esjp.jms.msg.listener.ActionListener;
+import org.efaps.jaas.AppAccessHandler;
+import org.efaps.jms.JmsHandler;
+import org.efaps.jms.JmsHandler.JmsDefinition;
 import org.efaps.test.AbstractTest;
+import org.efaps.util.EFapsException;
 import org.hornetq.api.core.TransportConfiguration;
 import org.hornetq.core.config.Configuration;
 import org.hornetq.core.config.impl.ConfigurationImpl;
@@ -41,6 +56,7 @@ import org.hornetq.jms.server.config.impl.JMSQueueConfigurationImpl;
 import org.hornetq.jms.server.embedded.EmbeddedJMS;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
 
 /**
  * TODO comment!
@@ -53,10 +69,16 @@ public class AbstractJmsTest
 {
 
     private Session session;
-    private String queueName;
+    private String requestQueueBinding;
+    private String respondQueueBinding;
 
     private EmbeddedJMS jmsServer;
     private Connection connection;
+
+    private MessageProducer requestProducer;
+    private MessageProducer respondProducer;
+    private String sessionKey;
+
 
     @BeforeTest(description = "connects to the eFaps database", groups = "connect")
     public void startJms()
@@ -85,10 +107,15 @@ public class AbstractJmsTest
         jmsConfig.getConnectionFactoryConfigurations().add(cfConfig);
 
         // Step 4. Configure the JMS Queue
-        this.queueName = "/queue/queue1";
+        this.requestQueueBinding = "/queue/resquestQueue";
+        this.respondQueueBinding = "/queue/respondQueue";
 
-        final JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl("queue1", null, false, this.queueName);
+        final JMSQueueConfiguration queueConfig = new JMSQueueConfigurationImpl("queue1", null, false,
+                        this.requestQueueBinding);
         jmsConfig.getQueueConfigurations().add(queueConfig);
+        final JMSQueueConfiguration queueConfig2 = new JMSQueueConfigurationImpl("queue2", null, false,
+                        this.respondQueueBinding);
+        jmsConfig.getQueueConfigurations().add(queueConfig2);
 
         // Step 5. Start the JMS Server using the HornetQ core server and the JMS configuration
         this.jmsServer = new EmbeddedJMS();
@@ -98,10 +125,27 @@ public class AbstractJmsTest
         System.out.println("Started Embedded JMS Server");
 
         final ConnectionFactory cf = (ConnectionFactory) this.jmsServer.lookup("/cf");
-        this.jmsServer.lookup(this.queueName);
         this.connection = cf.createConnection();
         this.session = this.connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
         this.connection.start();
+
+        // register efaps to recieve request
+        final MessageConsumer messageConsumer = getSession().createConsumer(getRequestQueue());
+        messageConsumer.setMessageListener(new ActionListener());
+        // register a resond in efaps
+        JmsHandler.addJmsDefintion(new JmsDefinition(getRespondQueue().getQueueName(), getRespondProducer(),
+                        this.session));
+    }
+
+    @BeforeTest(description = "connects to the eFaps database", groups = "connect")
+    public void initRunlevel()
+        throws EFapsException
+    {
+        Context.begin();
+        RunLevel.init("shell");
+        RunLevel.execute();
+        Context.rollback();
+        AppAccessHandler.init("jmsTest", new HashSet<String>());
     }
 
     @AfterTest(dependsOnGroups = "cleanup")
@@ -112,6 +156,24 @@ public class AbstractJmsTest
             this.connection.close();
         }
         this.jmsServer.stop();
+    }
+
+    @Test(dataProvider = "login", dataProviderClass = JmsDataProvider.class)
+    public void login(final String _xml)
+        throws JMSException
+    {
+               // server sends request
+        final MessageProducer producer = getRequestProducer();
+        final TextMessage msg = getSession().createTextMessage();
+        msg.setJMSReplyTo(getRespondQueue());
+        msg.setText(_xml);
+        producer.send(msg);
+
+        final MessageConsumer messageConsumer = getSession().createConsumer(getRespondQueue());
+        final Message respondMsg = messageConsumer.receive();
+
+        AbstractJmsTest.this.sessionKey = respondMsg.getStringProperty(AbstractContextListener.SESSIONKEY_PROPNAME);
+        messageConsumer.close();
     }
 
     /**
@@ -125,13 +187,51 @@ public class AbstractJmsTest
     }
 
     /**
-     * Getter method for the instance variable {@link #queueName}.
+     * Getter method for the instance variable {@link #requestQueueBinding}.
      *
-     * @return value of instance variable {@link #queueName}
+     * @return value of instance variable {@link #requestQueueBinding}
      */
-    public String getQueueName()
+    public String getRequestQueueBinding()
     {
-        return this.queueName;
+        return this.requestQueueBinding;
+    }
+
+    public MessageProducer getRequestProducer()
+        throws JMSException
+    {
+        if (this.requestProducer == null) {
+            this.requestProducer = getSession().createProducer(getRequestQueue());
+        }
+        return this.requestProducer;
+    }
+
+    public Queue getRequestQueue()
+    {
+        return (Queue) getJmsServer().lookup(getRequestQueueBinding());
+    }
+
+    public MessageProducer getRespondProducer()
+        throws JMSException
+    {
+        if (this.respondProducer == null) {
+            this.respondProducer = getSession().createProducer(getRespondQueue());
+        }
+        return this.respondProducer;
+    }
+
+    public Queue getRespondQueue()
+    {
+        return (Queue) getJmsServer().lookup(getRespondQueueBinding());
+    }
+
+    /**
+     * Getter method for the instance variable {@link #respondQueueBinding}.
+     *
+     * @return value of instance variable {@link #respondQueueBinding}
+     */
+    public String getRespondQueueBinding()
+    {
+        return this.respondQueueBinding;
     }
 
     /**
@@ -142,6 +242,29 @@ public class AbstractJmsTest
     public EmbeddedJMS getJmsServer()
     {
         return this.jmsServer;
+    }
+
+
+    /**
+     * Getter method for the instance variable {@link #sessionKey}.
+     *
+     * @return value of instance variable {@link #sessionKey}
+     */
+    protected String getSessionKey()
+    {
+        return this.sessionKey;
+    }
+
+
+    /**
+     * Setter method for instance variable {@link #sessionKey}.
+     *
+     * @param _sessionKey value for instance variable {@link #sessionKey}
+     */
+
+    protected void setSessionKey(final String _sessionKey)
+    {
+        this.sessionKey = _sessionKey;
     }
 
 }

@@ -72,10 +72,7 @@ public class JmsDataProvider
         return objects.iterator();
     }
 
-
-
     private static Document getContact()
-        throws ClassCastException, ClassNotFoundException, InstantiationException, IllegalAccessException
     {
         final Document xmldoc = new DocumentImpl();
         final Element root = xmldoc.createElement("contact");
@@ -102,6 +99,46 @@ public class JmsDataProvider
         client.appendChild(billingAdressCity);
         billingAdressCity.setTextContent("test_billingAdressCity");
         return xmldoc;
+    }
+
+    private static Document getLogin(final String _userName,
+                                     final String _password)
+    {
+        final Document xmldoc = new DocumentImpl();
+        final Element login = xmldoc.createElement("login");
+        xmldoc.appendChild(login);
+
+        final Element username = xmldoc.createElement("username");
+        username.setTextContent(_userName);
+        login.appendChild(username);
+
+        final Element password = xmldoc.createElement("password");
+        password.setTextContent(_password);
+        login.appendChild(password);
+
+        final Element applicationkey = xmldoc.createElement("applicationkey");
+        applicationkey.setTextContent("jmsTest");
+        login.appendChild(applicationkey);
+        return xmldoc;
+    }
+
+    @DataProvider(name = "login")
+    public static Iterator<Object[]> createLoginXML()
+        throws ClassCastException, ClassNotFoundException, InstantiationException, IllegalAccessException
+
+    {
+        final Document xmldoc = JmsDataProvider.getLogin("Administrator", "Administrator");
+
+        final DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
+        final DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
+        final LSSerializer writer = impl.createLSSerializer();
+        writer.getDomConfig().setParameter("format-pretty-print", true);
+
+        final String str = writer.writeToString(xmldoc);
+
+        final List<Object[]> objects = new ArrayList<Object[]>();
+        objects.add(new Object[] { str });
+        return objects.iterator();
     }
 
 }

@@ -20,6 +20,8 @@
 
 package org.efaps.esjp.jms;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -30,11 +32,33 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author The eFaps Team
  * @version $Id$
  */
+@XmlAccessorType(XmlAccessType.NONE)
 public abstract class AbstractObject
 {
 
     @XmlAttribute(name = "oid")
     private String oid;
+
+    /**
+     * Getter method for the instance variable {@link #oid}.
+     *
+     * @return value of instance variable {@link #oid}
+     */
+    public String getOid()
+    {
+        return this.oid;
+    }
+
+    /**
+     * Setter method for instance variable {@link #oid}.
+     *
+     * @param _oid value for instance variable {@link #oid}
+     */
+
+    public void setOid(final String _oid)
+    {
+        this.oid = _oid;
+    }
 
     @Override
     public String toString()
