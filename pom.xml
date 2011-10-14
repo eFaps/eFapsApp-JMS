@@ -349,6 +349,9 @@
                     <project>${project}</project>
                     <destdir>${project.build.directory}/generated-resources/schemas</destdir>
                     <srcdir>src/main/efaps/ESJP/org/efaps/esjp/jms</srcdir>
+                    <excludes>
+                        <exclude>**/msg/**</exclude>
+                    </excludes>
                     <verbose>true</verbose>
                 </configuration>
                 <dependencies>

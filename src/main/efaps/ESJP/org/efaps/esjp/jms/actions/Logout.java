@@ -21,6 +21,11 @@
 
 package org.efaps.esjp.jms.actions;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
 
 /**
  * TODO comment!
@@ -28,6 +33,9 @@ package org.efaps.esjp.jms.actions;
  * @author The eFaps Team
  * @version $Id$
  */
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlRootElement(name = "logout")
+@XmlType(name = "action.logout")
 public class Logout
 {
 
