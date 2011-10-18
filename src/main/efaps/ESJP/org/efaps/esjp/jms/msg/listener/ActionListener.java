@@ -34,8 +34,9 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import org.efaps.esjp.jms.actions.AbstractAction;
 import org.efaps.esjp.jms.actions.Create;
+import org.efaps.esjp.jms.actions.IAction;
+import org.efaps.esjp.jms.actions.Print;
 import org.efaps.util.EFapsException;
 
 
@@ -61,13 +62,13 @@ public class ActionListener
                 final TextMessage msg = (TextMessage) _msg;
                 final String xml = msg.getText();
                 System.out.println(xml);
-                final JAXBContext jc = JAXBContext.newInstance(Create.class);
+                final JAXBContext jc = JAXBContext.newInstance(Create.class, Print.class);
                 final Unmarshaller unmarschaller = jc.createUnmarshaller();
                 final Source source = new StreamSource(new StringReader(xml));
                 object = unmarschaller.unmarshal(source);
 
-                if (object instanceof AbstractAction) {
-                    final AbstractAction action = (AbstractAction) object;
+                if (object instanceof IAction) {
+                    final IAction action = (IAction) object;
                     action.execute();
                 }
             }
@@ -94,7 +95,7 @@ public class ActionListener
         throws JMSException
     {
         try {
-            final JAXBContext jc = JAXBContext.newInstance(Create.class);
+            final JAXBContext jc = JAXBContext.newInstance(Create.class, Print.class);
             final Marshaller marschaller = jc.createMarshaller();
             marschaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
             final StringWriter xml = new StringWriter();

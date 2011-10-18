@@ -18,23 +18,27 @@
  * Last Changed By: $Author$
  */
 
+
 package org.efaps.esjp.jms.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.efaps.db.Insert;
+import org.efaps.db.PrintQuery;
 import org.efaps.esjp.jms.AbstractObject;
 import org.efaps.esjp.jms.annotation.Attribute;
 import org.efaps.esjp.jms.annotation.Type;
 import org.efaps.esjp.jms.attributes.IAttribute;
 import org.efaps.util.EFapsException;
+
 
 /**
  * TODO comment!
@@ -43,9 +47,9 @@ import org.efaps.util.EFapsException;
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "create")
-@XmlType(name = "action.create")
-public class Create
+@XmlRootElement(name = "print")
+@XmlType(name = "action.print")
+public class Print
     extends AbstractAction
 {
     /**
@@ -58,14 +62,18 @@ public class Create
         for (final AbstractObject object : getObjects()) {
             final Type typeAnno = object.getClass().getAnnotation(Type.class);
             if (typeAnno != null) {
-                final Insert insert = new Insert(UUID.fromString(typeAnno.uuid()));
+                final PrintQuery print = new PrintQuery(object.getOid());
                 final Method[] methods = object.getClass().getDeclaredMethods();
+                final Map<Attribute, IAttribute<?>> attributes = new HashMap<Attribute,IAttribute<?>>();
                 for (final Method method : methods) {
                     final Attribute attributeAnno = method.getAnnotation(Attribute.class);
                     if (attributeAnno != null) {
                         try {
                             final IAttribute<?> value = (IAttribute<?>) method.invoke(object);
-                            insert.add(attributeAnno.name(), value.getValue());
+                            if (value.isPrint()) {
+                                print.addAttribute(attributeAnno.name());
+                                attributes.put(attributeAnno, value);
+                            }
                         } catch (final IllegalArgumentException e) {
                             throw new EFapsException("IllegalArgumentException", e);
                         } catch (final IllegalAccessException e) {
@@ -75,9 +83,14 @@ public class Create
                         }
                     }
                 }
-                insert.execute();
-                object.setOid(insert.getInstance().getOid());
+                if (print.execute()) {
+                    for (final Entry<Attribute, IAttribute<?>> entry : attributes.entrySet()) {
+                        final Object value = print.getAttribute(entry.getKey().name());
+                        entry.getValue().setValue( value);
+                    }
+                }
             }
         }
     }
+
 }

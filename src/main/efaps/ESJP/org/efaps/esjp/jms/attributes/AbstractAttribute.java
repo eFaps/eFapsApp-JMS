@@ -18,15 +18,14 @@
  * Last Changed By: $Author$
  */
 
-package org.efaps.esjp.jms.contacts;
+
+package org.efaps.esjp.jms.attributes;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
-import org.efaps.esjp.jms.annotation.Type;
-import org.efaps.esjp.jms.attributes.StringAttribute;
 
 /**
  * TODO comment!
@@ -35,15 +34,30 @@ import org.efaps.esjp.jms.attributes.StringAttribute;
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name = "contacts.classificationclient")
-@Type(uuid="48884a92-72c3-4671-b1a4-2b8babadf8b5")
-public class ClassificationClient
-    extends AbstractClassification
+@XmlType(name = "attribute.abstract")
+public abstract class AbstractAttribute<T>
+    implements IAttribute<T>
 {
-    @XmlElement(name="billingadressstreet", required=true)
-    private StringAttribute billingAdressStreet;
+    @XmlAttribute
+    private boolean print;
 
-    @XmlElement(name="billingadresscity", required=true)
-    private StringAttribute billingAdressCity;
+    /**
+     * Getter method for the instance variable {@link #print}.
+     *
+     * @return value of instance variable {@link #print}
+     */
+    public boolean isPrint()
+    {
+        return this.print;
+    }
 
+    /**
+     * Setter method for instance variable {@link #print}.
+     *
+     * @param _print value for instance variable {@link #print}
+     */
+    public void setPrint(final boolean _print)
+    {
+        this.print = _print;
+    }
 }

@@ -34,6 +34,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.efaps.esjp.jms.AbstractObject;
 import org.efaps.esjp.jms.annotation.Attribute;
 import org.efaps.esjp.jms.annotation.Type;
+import org.efaps.esjp.jms.attributes.StringAttribute;
 
 /**
  * TODO comment!
@@ -49,7 +50,7 @@ public class Contact
     extends AbstractObject
 {
     @XmlElement(name = "name", required = true)
-    private String name;
+    private StringAttribute name;
 
     @XmlElements({
                     @XmlElement(name = "client", type = ClassificationClient.class),
@@ -64,7 +65,7 @@ public class Contact
      * @return value of instance variable {@link #name}
      */
     @Attribute(name = "Name")
-    public String getName()
+    public StringAttribute getName()
     {
         return this.name;
     }

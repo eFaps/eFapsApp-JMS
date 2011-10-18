@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.efaps.esjp.jms.annotation.Type;
+import org.efaps.esjp.jms.attributes.StringAttribute;
 
 /**
  * TODO comment!
@@ -40,5 +41,5 @@ public class ClassificationOrganisation
     extends AbstractClassification
 {
     @XmlElement(name="taxnumber", required=true)
-    private String taxNumber;
+    private StringAttribute taxNumber;
 }

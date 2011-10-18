@@ -18,15 +18,9 @@
  * Last Changed By: $Author$
  */
 
-package org.efaps.esjp.jms.contacts;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+package org.efaps.esjp.jms.attributes;
 
-import org.efaps.esjp.jms.annotation.Type;
-import org.efaps.esjp.jms.attributes.StringAttribute;
 
 /**
  * TODO comment!
@@ -34,16 +28,15 @@ import org.efaps.esjp.jms.attributes.StringAttribute;
  * @author The eFaps Team
  * @version $Id$
  */
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name = "contacts.classificationclient")
-@Type(uuid="48884a92-72c3-4671-b1a4-2b8babadf8b5")
-public class ClassificationClient
-    extends AbstractClassification
+public interface IAttribute<T>
 {
-    @XmlElement(name="billingadressstreet", required=true)
-    private StringAttribute billingAdressStreet;
 
-    @XmlElement(name="billingadresscity", required=true)
-    private StringAttribute billingAdressCity;
+    public T getValue();
 
+    boolean isPrint();
+
+    /**
+     * @param _value
+     */
+    public void setValue(Object _value);
 }

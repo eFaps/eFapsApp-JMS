@@ -47,41 +47,58 @@ public class JmsDataProvider
     public static Iterator<Object[]> createXML(final Method _method)
         throws ClassCastException, ClassNotFoundException, InstantiationException, IllegalAccessException
     {
-        final Document xmldoc = JmsDataProvider.getContact();
-
-        if (_method.getName().contains("create")) {
-            final Element action = xmldoc.createElement("create");
-            final Element objectsElement = xmldoc.createElement("objects");
-            action.appendChild(objectsElement);
-
-            final Node root = xmldoc.getFirstChild();
-            xmldoc.removeChild(root);
-            objectsElement.appendChild(root);
-            xmldoc.appendChild(action);
+        Document xmldoc = JmsDataProvider.getContact(null);
+        if ("create".equals(_method.getName())) {
+            xmldoc = JmsDataProvider.getActionDoc("create", xmldoc);
         }
 
+        final List<Object[]> objects = new ArrayList<Object[]>();
+        objects.add(new Object[] { JmsDataProvider.serialize(xmldoc) });
+        return objects.iterator();
+    }
+
+    public static String serialize(final Document _xmlDoc)
+                    throws ClassCastException, ClassNotFoundException, InstantiationException, IllegalAccessException
+    {
         final DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
         final DOMImplementationLS impl = (DOMImplementationLS) registry.getDOMImplementation("LS");
         final LSSerializer writer = impl.createLSSerializer();
         writer.getDomConfig().setParameter("format-pretty-print", true);
 
-        final String str = writer.writeToString(xmldoc);
-
-        final List<Object[]> objects = new ArrayList<Object[]>();
-        objects.add(new Object[] { str });
-        return objects.iterator();
+        return  writer.writeToString(_xmlDoc);
     }
 
-    private static Document getContact()
+    public static Document getActionDoc(final String _action,
+                                        final Document _xmlDoc)
+    {
+
+        final Element action = _xmlDoc.createElement(_action);
+        final Element objectsElement = _xmlDoc.createElement("objects");
+        action.appendChild(objectsElement);
+
+        final Node root = _xmlDoc.getFirstChild();
+        _xmlDoc.removeChild(root);
+        objectsElement.appendChild(root);
+        _xmlDoc.appendChild(action);
+        return _xmlDoc;
+    }
+
+    public static Document getContact(final String _oid)
     {
         final Document xmldoc = new DocumentImpl();
         final Element root = xmldoc.createElement("contact");
         xmldoc.appendChild(root);
-
+        if (_oid != null) {
+            root.setAttribute("oid", _oid);
+        }
         final Element name = xmldoc.createElement("name");
         root.appendChild(name);
-        name.setTextContent("test_testName");
-
+        // name.setTextContent("test_testName");
+        if (_oid != null) {
+            name.setAttribute("print", "true");
+        } else {
+            name.setAttribute("value", "test_testName");
+        }
         final Element classifications = xmldoc.createElement("classifications");
         root.appendChild(classifications);
         final Element organisation = xmldoc.createElement("organisation");
