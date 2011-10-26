@@ -35,7 +35,7 @@ import javax.jms.TextMessage;
 
 import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.db.Context;
-import org.efaps.esjp.jms.msg.listener.AbstractContextListener;
+import org.efaps.esjp.jms.msg.listener.AbstractContextListener_Base;
 import org.efaps.esjp.jms.msg.listener.ActionListener;
 import org.efaps.jaas.AppAccessHandler;
 import org.efaps.jms.JmsHandler;
@@ -172,7 +172,7 @@ public class AbstractJmsTest
         final MessageConsumer messageConsumer = getSession().createConsumer(getRespondQueue());
         final Message respondMsg = messageConsumer.receive();
 
-        AbstractJmsTest.this.sessionKey = respondMsg.getStringProperty(AbstractContextListener.SESSIONKEY_PROPNAME);
+        AbstractJmsTest.this.sessionKey = respondMsg.getStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME);
         messageConsumer.close();
     }
 

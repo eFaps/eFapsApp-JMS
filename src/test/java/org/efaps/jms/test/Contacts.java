@@ -15,7 +15,7 @@ import javax.xml.transform.stream.StreamSource;
 import org.efaps.esjp.jms.actions.Create;
 import org.efaps.esjp.jms.actions.Print;
 import org.efaps.esjp.jms.contacts.Contact;
-import org.efaps.esjp.jms.msg.listener.AbstractContextListener;
+import org.efaps.esjp.jms.msg.listener.AbstractContextListener_Base;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.w3c.dom.Document;
@@ -44,7 +44,7 @@ public class Contacts
         final MessageProducer producer = getRequestProducer();
         final TextMessage msg = getSession().createTextMessage();
         msg.setJMSReplyTo(getRespondQueue());
-        msg.setStringProperty(AbstractContextListener.SESSIONKEY_PROPNAME, getSessionKey());
+        msg.setStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME, getSessionKey());
         msg.setText(_xml);
         producer.send(msg);
 
@@ -66,7 +66,7 @@ public class Contacts
 
         final TextMessage msg2 = getSession().createTextMessage();
         msg2.setJMSReplyTo(getRespondQueue());
-        msg2.setStringProperty(AbstractContextListener.SESSIONKEY_PROPNAME, getSessionKey());
+        msg2.setStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME, getSessionKey());
         msg2.setText(msgText);
         producer.send(msg2);
 

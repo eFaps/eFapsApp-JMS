@@ -18,11 +18,9 @@
  * Last Changed By: $Author$
  */
 
-package org.efaps.esjp.jms.msg.listener;
 
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.TextMessage;
+package org.efaps.esjp.jms.actions;
+
 
 /**
  * TODO comment!
@@ -30,28 +28,7 @@ import javax.jms.TextMessage;
  * @author The eFaps Team
  * @version $Id$
  */
-public class PrintListener
-    extends  AbstractContextListener_Base
+public class Search
 {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object onSessionMessage(final Message _msg)
-    {
-        AbstractContextListener_Base.LOG.info(_msg.toString());
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void respondSessionMessage(final TextMessage _msg,
-                                         final Object _object)
-       throws JMSException
-    {
-        _msg.setText("respond");
-    }
 }
