@@ -34,6 +34,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import org.efaps.db.Context;
 import org.efaps.esjp.jms.actions.Login;
 import org.efaps.jms.JmsHandler;
 import org.efaps.jms.JmsHandler.JmsDefinition;
@@ -52,7 +53,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractContextListener_Base
     implements MessageListener
 {
-
     public final static String SESSIONKEY_PROPNAME = "SessionKey";
 
     /**
@@ -68,7 +68,11 @@ public abstract class AbstractContextListener_Base
             if (sessionKey == null) {
                 final TextMessage msg = (TextMessage) _msg;
                 final String xml = msg.getText();
+                // open a context, because the classes are loaded from the eFaspClassLoader and this loader
+                // needs a database connection
+                Context.begin(null, false);
                 final JAXBContext jc = JAXBContext.newInstance(Login.class);
+                Context.rollback();
                 final Unmarshaller unmarschaller = jc.createUnmarshaller();
                 final Source source = new StreamSource(new StringReader(xml));
                 final Login loginObject = (Login) unmarschaller.unmarshal(source);
@@ -85,14 +89,11 @@ public abstract class AbstractContextListener_Base
                 session.closeContext();
             }
         } catch (final JMSException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("JMSException", e);
         } catch (final EFapsException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("EFapsException", e);
         } catch (final JAXBException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("JAXBException", e);
         }
     }
 
