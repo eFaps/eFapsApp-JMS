@@ -35,6 +35,8 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
 import org.efaps.db.Context;
+import org.efaps.esjp.jms.actions.DBPropertiesAction;
+import org.efaps.esjp.jms.actions.INoUserContextRequired;
 import org.efaps.esjp.jms.actions.Login;
 import org.efaps.jms.JmsHandler;
 import org.efaps.jms.JmsHandler.JmsDefinition;
@@ -71,15 +73,21 @@ public abstract class AbstractContextListener_Base
                 // open a context, because the classes are loaded from the eFaspClassLoader and this loader
                 // needs a database connection
                 Context.begin(null, false);
-                final JAXBContext jc = JAXBContext.newInstance(Login.class);
-                Context.rollback();
+                final JAXBContext jc = JAXBContext.newInstance(getNoLoginClasses());
                 final Unmarshaller unmarschaller = jc.createUnmarshaller();
                 final Source source = new StreamSource(new StringReader(xml));
-                final Login loginObject = (Login) unmarschaller.unmarshal(source);
-                if (loginObject != null) {
+                final Object object = unmarschaller.unmarshal(source);
+                if (object != null && object instanceof Login) {
+                    final Login loginObject = (Login) object;
                     sessionKey = JmsSession.login(loginObject.getUserName(), loginObject.getPassword(),
                                     loginObject.getApplicationKey());
                     respond(_msg, sessionKey, null);
+                } else if (object instanceof INoUserContextRequired){
+                    final Object object2 = onSessionMessage(_msg);
+                    respond(_msg, null, object2);
+                }
+                if (Context.isThreadActive()) {
+                    Context.rollback();
                 }
             } else {
                 final JmsSession session = JmsSession.getSession(sessionKey);
@@ -119,6 +127,9 @@ public abstract class AbstractContextListener_Base
         }
     }
 
+    protected Class<?>[] getNoLoginClasses() {
+        return new Class[] { Login.class, DBPropertiesAction.class };
+    }
 
     protected abstract Object onSessionMessage(final Message _msg);
 

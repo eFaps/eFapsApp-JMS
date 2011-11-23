@@ -38,6 +38,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @XmlRootElement(name = "login")
 @XmlType(name = "action.login")
 public class Login
+    implements INoUserContextRequired
 {
 
     @XmlElement(name = "username", required = true)

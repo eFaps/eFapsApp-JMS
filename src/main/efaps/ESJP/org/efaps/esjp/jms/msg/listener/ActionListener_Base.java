@@ -24,6 +24,7 @@ package org.efaps.esjp.jms.msg.listener;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -71,6 +72,7 @@ public abstract class ActionListener_Base
                     final IAction action = (IAction) object;
                     action.execute();
                 }
+            } else if (_msg instanceof BytesMessage) {
             }
         } catch (final JMSException e) {
             // TODO Auto-generated catch block

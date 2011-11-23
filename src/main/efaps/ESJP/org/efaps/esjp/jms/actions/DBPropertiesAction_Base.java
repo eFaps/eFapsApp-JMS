@@ -43,7 +43,7 @@ import org.efaps.util.EFapsException;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name="action.dbproperties_base")
 public abstract class DBPropertiesAction_Base
-    implements IAction
+    implements IAction, INoUserContextRequired
 {
     @XmlElement(name = "dbproperty")
     @XmlElementWrapper(name = "dbproperties")
