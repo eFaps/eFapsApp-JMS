@@ -20,8 +20,10 @@
 
 package org.efaps.esjp.jms.msg.listener;
 
+import java.io.File;
 import java.io.StringReader;
 
+import javax.jms.BytesMessage;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -46,8 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A listener which opens a Context on a receiving a Message
- * and closes it after the execution of the subclasses.
+ * A listener which opens a Context on a receiving a Message and closes it after the execution of the subclasses.
  *
  * @author The eFaps Team
  * @version $Id$
@@ -55,7 +56,10 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractContextListener_Base
     implements MessageListener
 {
+
     public final static String SESSIONKEY_PROPNAME = "SessionKey";
+
+    public final static String FILENAME_PROPNAME = "FileName";
 
     /**
      * Logging instance used in this class.
@@ -82,7 +86,7 @@ public abstract class AbstractContextListener_Base
                     sessionKey = JmsSession.login(loginObject.getUserName(), loginObject.getPassword(),
                                     loginObject.getApplicationKey());
                     respond(_msg, sessionKey, null);
-                } else if (object instanceof INoUserContextRequired){
+                } else if (object instanceof INoUserContextRequired) {
                     final Object object2 = onSessionMessage(_msg);
                     respond(_msg, null, object2);
                 }
@@ -115,23 +119,38 @@ public abstract class AbstractContextListener_Base
             final String name = ((Queue) replyto).getQueueName();
             final JmsDefinition def = JmsHandler.getJmsDefinition(name);
             if (def != null) {
-                final TextMessage msg = def.getSession().createTextMessage();
-                msg.setJMSCorrelationID(_msg.getJMSCorrelationID());
-                if (_sessionKey == null && _object != null) {
-                    respondSessionMessage(msg, _object);
+                Message msg;
+                if (_object != null && _object instanceof File) {
+                    msg = def.getSession().createBytesMessage();
+                    msg.setStringProperty(AbstractContextListener_Base.FILENAME_PROPNAME, ((File) _object).getName());
+                    respondSessionBytestMessage((BytesMessage) msg, _object);
                 } else {
-                    msg.setStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME, _sessionKey);
+                    msg = def.getSession().createTextMessage();
+                    if (_sessionKey == null && _object != null) {
+                        respondSessionTextMessage((TextMessage) msg, _object);
+                    } else {
+                        msg.setStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME, _sessionKey);
+                    }
                 }
+                msg.setJMSCorrelationID(_msg.getJMSCorrelationID());
                 def.getMessageProducer().send(msg);
             }
         }
     }
 
-    protected Class<?>[] getNoLoginClasses() {
+    protected Class<?>[] getNoLoginClasses()
+    {
         return new Class[] { Login.class, DBPropertiesAction.class };
     }
 
     protected abstract Object onSessionMessage(final Message _msg);
 
-    protected abstract void respondSessionMessage(final TextMessage _msg, final Object _object) throws JMSException;
+    protected abstract void respondSessionTextMessage(final TextMessage _msg,
+                                                      final Object _object)
+        throws JMSException;
+
+    protected abstract void respondSessionBytestMessage(final BytesMessage _msg,
+                                                        final Object _object)
+        throws JMSException;
+
 }

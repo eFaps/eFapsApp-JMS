@@ -18,9 +18,16 @@
  * Last Changed By: $Author$
  */
 
-
 package org.efaps.esjp.jms.msg.listener;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -35,11 +42,11 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import org.efaps.esjp.common.file.FileUtil;
 import org.efaps.esjp.jms.actions.Create;
 import org.efaps.esjp.jms.actions.IAction;
 import org.efaps.esjp.jms.actions.Print;
 import org.efaps.util.EFapsException;
-
 
 /**
  * TODO comment!
@@ -48,7 +55,7 @@ import org.efaps.util.EFapsException;
  * @version $Id$
  */
 public abstract class ActionListener_Base
-    extends  AbstractContextListener
+    extends AbstractContextListener
 {
 
     /**
@@ -67,12 +74,22 @@ public abstract class ActionListener_Base
                 final Unmarshaller unmarschaller = jc.createUnmarshaller();
                 final Source source = new StreamSource(new StringReader(xml));
                 object = unmarschaller.unmarshal(source);
-
-                if (object instanceof IAction) {
-                    final IAction action = (IAction) object;
-                    action.execute();
-                }
             } else if (_msg instanceof BytesMessage) {
+                final FileUtil fileUtil = new FileUtil();
+                final File file = fileUtil.getFile(_msg
+                                .getStringProperty(AbstractContextListener_Base.FILENAME_PROPNAME));
+                final FileOutputStream fos = new FileOutputStream(file);
+                final BufferedOutputStream outBuf = new BufferedOutputStream(fos);
+                int i;
+                while ((i = ((BytesMessage) _msg).readInt()) != -1) {
+                    outBuf.write(i);
+                }
+                outBuf.close();
+                fos.close();
+            }
+            if (object instanceof IAction) {
+                final IAction action = (IAction) object;
+                object = action.execute();
             }
         } catch (final JMSException e) {
             // TODO Auto-generated catch block
@@ -83,17 +100,24 @@ public abstract class ActionListener_Base
         } catch (final EFapsException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (final FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (final IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         return object;
     }
 
     /**
      * {@inheritDoc}
+     *
      * @throws JMSException
      */
     @Override
-    protected void respondSessionMessage(final TextMessage _msg,
-                                         final Object _object)
+    protected void respondSessionTextMessage(final TextMessage _msg,
+                                             final Object _object)
         throws JMSException
     {
         try {
@@ -109,7 +133,40 @@ public abstract class ActionListener_Base
         }
     }
 
-    protected Class<?>[] getClasses() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void respondSessionBytestMessage(final BytesMessage _msg,
+                                               final Object _object)
+        throws JMSException
+    {
+        if (_object instanceof File) {
+            final File fileToPublish = (File) _object;
+
+            InputStream in;
+            try {
+                in = new FileInputStream(fileToPublish);
+                final BufferedInputStream inBuf = new BufferedInputStream(in);
+                int i;
+                while ((i = inBuf.read()) != -1) {
+                    _msg.writeInt(i);
+                }
+                // adding an eof
+                _msg.writeInt(-1);
+            } catch (final FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (final IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+    protected Class<?>[] getClasses()
+    {
         return new Class[] { Create.class, Print.class };
     }
 }

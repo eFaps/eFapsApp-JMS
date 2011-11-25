@@ -56,7 +56,7 @@ public class Print
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public Object execute()
         throws EFapsException
     {
         for (final AbstractObject object : getObjects()) {
@@ -91,6 +91,7 @@ public class Print
                 }
             }
         }
+        return this;
     }
 
 }

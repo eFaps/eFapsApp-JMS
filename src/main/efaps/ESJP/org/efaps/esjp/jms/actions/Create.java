@@ -52,7 +52,7 @@ public class Create
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public Object execute()
         throws EFapsException
     {
         for (final AbstractObject object : getObjects()) {
@@ -79,5 +79,6 @@ public class Create
                 object.setOid(insert.getInstance().getOid());
             }
         }
+        return this;
     }
 }

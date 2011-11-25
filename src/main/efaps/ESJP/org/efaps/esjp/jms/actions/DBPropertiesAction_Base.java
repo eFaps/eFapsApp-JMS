@@ -50,11 +50,12 @@ public abstract class DBPropertiesAction_Base
     private final ArrayList<DBProperty> properties = new ArrayList<DBProperty>();
 
     @Override
-    public void execute()
+    public Object execute()
         throws EFapsException
     {
         for (final DBProperty property : this.properties) {
             property.setValue(DBProperties.getProperty(property.getKey(), property.getLanguage()));
         }
+        return this;
     }
 }

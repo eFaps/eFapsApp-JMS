@@ -20,6 +20,7 @@
 
 package org.efaps.esjp.jms.msg.listener;
 
+import javax.jms.BytesMessage;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.TextMessage;
@@ -33,7 +34,6 @@ import javax.jms.TextMessage;
 public class PrintListener
     extends  AbstractContextListener_Base
 {
-
     /**
      * {@inheritDoc}
      */
@@ -48,10 +48,21 @@ public class PrintListener
      * {@inheritDoc}
      */
     @Override
-    protected void respondSessionMessage(final TextMessage _msg,
-                                         final Object _object)
-       throws JMSException
+    protected void respondSessionTextMessage(final TextMessage _msg,
+                                             final Object _object)
+        throws JMSException
     {
         _msg.setText("respond");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void respondSessionBytestMessage(final BytesMessage _msg,
+                                               final Object _object)
+        throws JMSException
+    {
+
     }
 }

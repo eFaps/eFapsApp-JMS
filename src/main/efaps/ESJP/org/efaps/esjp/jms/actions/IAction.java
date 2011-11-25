@@ -33,9 +33,11 @@ import org.efaps.util.EFapsException;
 public interface IAction
 {
     /**
-     * Execute the action.
+     * Execute the action and returns the Object that will be
+     * send as part of the response.
+     *
      * @throws EFapsException on error
      */
-    void execute() throws EFapsException;
+    Object execute() throws EFapsException;
 
 }
