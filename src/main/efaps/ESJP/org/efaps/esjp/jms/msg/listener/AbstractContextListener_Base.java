@@ -72,11 +72,14 @@ public abstract class AbstractContextListener_Base
         try {
             String sessionKey = _msg.getStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME);
             if (sessionKey == null) {
+                AbstractContextListener_Base.LOG.debug("Recieved SessionKey: '{}'" , sessionKey);
                 final TextMessage msg = (TextMessage) _msg;
                 final String xml = msg.getText();
                 // open a context, because the classes are loaded from the eFaspClassLoader and this loader
                 // needs a database connection
-                Context.begin(null, false);
+                if (!Context.isTMActive()) {
+                    Context.begin(null, false);
+                }
                 final JAXBContext jc = JAXBContext.newInstance(getNoLoginClasses());
                 final Unmarshaller unmarschaller = jc.createUnmarshaller();
                 final Source source = new StreamSource(new StringReader(xml));
@@ -87,10 +90,12 @@ public abstract class AbstractContextListener_Base
                                     loginObject.getApplicationKey());
                     respond(_msg, sessionKey, null);
                 } else if (object instanceof INoUserContextRequired) {
+                    AbstractContextListener_Base.LOG.debug("Executing INoUserContextRequired: '{}'" , object);
                     final Object object2 = onSessionMessage(_msg);
                     respond(_msg, null, object2);
                 }
                 if (Context.isThreadActive()) {
+                    AbstractContextListener_Base.LOG.debug("perfoming rollback");
                     Context.rollback();
                 }
             } else {
@@ -106,6 +111,14 @@ public abstract class AbstractContextListener_Base
             AbstractContextListener_Base.LOG.error("EFapsException", e);
         } catch (final JAXBException e) {
             AbstractContextListener_Base.LOG.error("JAXBException", e);
+        } finally {
+            if (Context.isThreadActive()) {
+                try {
+                    Context.rollback();
+                } catch (final EFapsException e) {
+                    AbstractContextListener_Base.LOG.error("JAXBException", e);
+                }
+            }
         }
     }
 
