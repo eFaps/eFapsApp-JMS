@@ -61,6 +61,14 @@ public abstract class AbstractContextListener_Base
 
     public final static String FILENAME_PROPNAME = "FileName";
 
+    public final static String ERRORCODE_PROPNAME = "ErrorCode";
+
+
+    public enum ERROCODE
+    {
+        SESSIONTIMEOUT;
+    }
+
     /**
      * Logging instance used in this class.
      */
@@ -72,7 +80,6 @@ public abstract class AbstractContextListener_Base
         try {
             String sessionKey = _msg.getStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME);
             if (sessionKey == null) {
-                AbstractContextListener_Base.LOG.debug("Recieved SessionKey: '{}'" , sessionKey);
                 final TextMessage msg = (TextMessage) _msg;
                 final String xml = msg.getText();
                 // open a context, because the classes are loaded from the eFaspClassLoader and this loader
@@ -99,11 +106,16 @@ public abstract class AbstractContextListener_Base
                     Context.rollback();
                 }
             } else {
+                AbstractContextListener_Base.LOG.debug("Recieved SessionKey: '{}'" , sessionKey);
                 final JmsSession session = JmsSession.getSession(sessionKey);
-                session.openContext();
-                final Object object = onSessionMessage(_msg);
-                respond(_msg, null, object);
-                session.closeContext();
+                if (session == null) {
+                    respondError(_msg, ERROCODE.SESSIONTIMEOUT.name());
+                } else {
+                    session.openContext();
+                    final Object object = onSessionMessage(_msg);
+                    respond(_msg, null, object);
+                    session.closeContext();
+                }
             }
         } catch (final JMSException e) {
             AbstractContextListener_Base.LOG.error("JMSException", e);
@@ -119,6 +131,22 @@ public abstract class AbstractContextListener_Base
                     AbstractContextListener_Base.LOG.error("JAXBException", e);
                 }
             }
+        }
+    }
+
+
+    protected void respondError(final Message _msg,
+                                final String _errorCode)
+        throws JMSException
+    {
+        final Destination replyto = _msg.getJMSReplyTo();
+        if (replyto instanceof  Queue) {
+            final String name = ((Queue) replyto).getQueueName();
+            final JmsDefinition def = JmsHandler.getJmsDefinition(name);
+            final TextMessage msg = def.getSession().createTextMessage();
+            msg.setJMSCorrelationID(_msg.getJMSCorrelationID());
+            msg.setStringProperty(AbstractContextListener_Base.ERRORCODE_PROPNAME, _errorCode);
+            def.getMessageProducer().send(msg);
         }
     }
 
