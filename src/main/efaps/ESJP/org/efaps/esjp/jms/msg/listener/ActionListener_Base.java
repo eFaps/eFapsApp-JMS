@@ -57,7 +57,6 @@ import org.efaps.util.EFapsException;
 public abstract class ActionListener_Base
     extends AbstractContextListener
 {
-
     /**
      * {@inheritDoc}
      */
@@ -69,7 +68,7 @@ public abstract class ActionListener_Base
             if (_msg instanceof TextMessage) {
                 final TextMessage msg = (TextMessage) _msg;
                 final String xml = msg.getText();
-                System.out.println(xml);
+                AbstractContextListener_Base.LOG.debug("unmarshalling: {} ", xml);
                 final JAXBContext jc = JAXBContext.newInstance(getClasses());
                 final Unmarshaller unmarschaller = jc.createUnmarshaller();
                 final Source source = new StreamSource(new StringReader(xml));
@@ -92,20 +91,15 @@ public abstract class ActionListener_Base
                 object = action.execute();
             }
         } catch (final JMSException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("JMSException", e);
         } catch (final JAXBException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("JAXBException", e);
         } catch (final EFapsException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("EFapsException", e);
         } catch (final FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("FileNotFoundException", e);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("IOException", e);
         }
         return object;
     }
@@ -127,9 +121,9 @@ public abstract class ActionListener_Base
             final StringWriter xml = new StringWriter();
             marschaller.marshal(_object, xml);
             _msg.setText(xml.toString());
+            AbstractContextListener_Base.LOG.debug("setting text: {}", xml);
         } catch (final JAXBException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            AbstractContextListener_Base.LOG.error("JAXBException", e);
         }
     }
 
