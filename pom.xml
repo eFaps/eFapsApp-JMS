@@ -500,23 +500,23 @@
             <version>1.4</version>
             <scope>test</scope>
         </dependency>
-<dependency>
-    <groupId>org.hornetq</groupId>
-    <artifactId>hornetq-core</artifactId>
-    <version>2.2.7.Final</version>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>org.hornetq</groupId>
-    <artifactId>hornetq-jms</artifactId>
-    <version>2.2.7.Final</version>
-    <scope>test</scope>
-</dependency>
-<dependency>
-    <groupId>org.jboss.netty</groupId>
-    <artifactId>netty</artifactId>
-    <version>3.2.5.Final</version>
-    <scope>test</scope>
-</dependency>
+        <dependency>
+            <groupId>org.hornetq</groupId>
+            <artifactId>hornetq-core</artifactId>
+            <version>2.2.7.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hornetq</groupId>
+            <artifactId>hornetq-jms</artifactId>
+            <version>2.2.7.Final</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.netty</groupId>
+            <artifactId>netty</artifactId>
+            <version>3.2.5.Final</version>
+            <scope>test</scope>
+        </dependency>
         </dependencies>
 </project>
