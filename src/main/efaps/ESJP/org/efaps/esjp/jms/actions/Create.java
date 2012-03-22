@@ -61,17 +61,19 @@ public class Create
                 final Insert insert = new Insert(UUID.fromString(typeAnno.uuid()));
                 final Method[] methods = object.getClass().getDeclaredMethods();
                 for (final Method method : methods) {
-                    final Attribute attributeAnno = method.getAnnotation(Attribute.class);
-                    if (attributeAnno != null) {
-                        try {
-                            final IAttribute<?> value = (IAttribute<?>) method.invoke(object);
-                            insert.add(attributeAnno.name(), value.getValue());
-                        } catch (final IllegalArgumentException e) {
-                            throw new EFapsException("IllegalArgumentException", e);
-                        } catch (final IllegalAccessException e) {
-                            throw new EFapsException("IllegalAccessException", e);
-                        } catch (final InvocationTargetException e) {
-                            throw new EFapsException("InvocationTargetException", e);
+                    if (method.isAnnotationPresent(Attribute.class)) {
+                        final Attribute attributeAnno = method.getAnnotation(Attribute.class);
+                        if (attributeAnno != null) {
+                            try {
+                                final IAttribute<?> value = (IAttribute<?>) method.invoke(object);
+                                insert.add(attributeAnno.name(), value.getValue());
+                            } catch (final IllegalArgumentException e) {
+                                throw new EFapsException("IllegalArgumentException", e);
+                            } catch (final IllegalAccessException e) {
+                                throw new EFapsException("IllegalAccessException", e);
+                            } catch (final InvocationTargetException e) {
+                                throw new EFapsException("InvocationTargetException", e);
+                            }
                         }
                     }
                 }

@@ -21,12 +21,6 @@
 
 package org.efaps.esjp.jms.annotation;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 
 /**
  * TODO comment!
@@ -34,18 +28,15 @@ import java.lang.annotation.Target;
  * @author The eFaps Team
  * @version $Id$
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Attribute
+public enum MethodType
 {
     /**
-     * Name of the Attribute as it is defined in the eFaps Type.
+     * Mark a getter class.
      */
-    String name();
+    GETTER,
 
     /**
-     * The type of the method.
+     * Mark a setter class.
      */
-    MethodType method();
+    SETTER;
 }
