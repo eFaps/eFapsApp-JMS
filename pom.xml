@@ -2,7 +2,7 @@
 
 <!--
 
- Copyright 2003 - 2011 The eFaps Team
+ Copyright 2003 - 2012 The eFaps Team
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -22,16 +22,13 @@
  Last Changed By: $Author$
 
 -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <!-- ************************************************************************
-    * Module Definition
-    ************************************************************************* -->
+        * Module Definition ************************************************************************* -->
     <packaging>jar</packaging>
     <groupId>org.efaps.apps</groupId>
     <artifactId>jms</artifactId>
@@ -40,7 +37,7 @@
     <description>
     </description>
 
-     <url>http://www.efaps.org</url>
+    <url>http://www.efaps.org</url>
     <licenses>
         <license>
             <name>Apache 2.0 License</name>
@@ -112,13 +109,10 @@
         </repository>
     </distributionManagement>
 
-   <!-- ************************************************************************
-    * Profiles
-    ************************************************************************* -->
+    <!-- ************************************************************************
+        * Profiles ************************************************************************* -->
     <profiles>
-        <!--
-            Release Profile is done without tests, but with source and JavaDoc!
-        -->
+        <!-- Release Profile is done without tests, but with source and JavaDoc! -->
         <profile>
             <id>release-profile</id>
             <activation>
@@ -198,8 +192,7 @@
     </profiles>
 
     <!-- ************************************************************************
-    * Reporting
-    ************************************************************************* -->
+        * Reporting ************************************************************************* -->
     <reporting>
         <plugins>
             <plugin>
@@ -213,7 +206,7 @@
                             <report>summary</report>
                             <report>dependencies</report>
                             <report>project-team</report>
-                            <!--   <report>mailing-list</report>-->
+                            <!-- <report>mailing-list</report> -->
                             <!-- <report>cim</report> -->
                             <report>issue-tracking</report>
                             <report>license</report>
@@ -270,7 +263,7 @@
                     <targetJdk>1.5</targetJdk>
                 </configuration>
             </plugin>
-            <!--  findbugs report -->
+            <!-- findbugs report -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
@@ -281,30 +274,23 @@
     </reporting>
 
     <!-- ************************************************************************
-  * Project itself
-  ************************************************************************* -->
+        * Project itself ************************************************************************* -->
     <build>
         <plugins>
-            <!--
-                Compiler Settings:
-                - Java 1.6 is needed!
-                - UTF8 encoding
-            -->
+            <!-- Compiler Settings: - Java 1.6 is needed! - UTF8 encoding -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.3.2</version>
                 <configuration>
-                   <verbose>true</verbose>
+                    <verbose>true</verbose>
                     <source>1.6</source>
                     <target>1.6</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
 
-            <!--
-                eFaps plugin
-            -->
+            <!-- eFaps plugin -->
             <plugin>
                 <groupId>org.efaps</groupId>
                 <artifactId>maven-efaps-plugin</artifactId>
@@ -346,7 +332,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <project>${project}</project>
+                    <project>
+                        ${project}
+                    </project>
                     <destdir>${project.build.directory}/generated-resources/schemas</destdir>
                     <srcdir>src/main/efaps/ESJP/org/efaps/esjp/jms</srcdir>
                     <excludes>
@@ -370,7 +358,7 @@
                         <artifactId>jaxb-impl</artifactId>
                         <version>2.2</version>
                     </dependency>
-               </dependencies>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -385,7 +373,8 @@
         </plugins>
         <pluginManagement>
             <plugins>
-                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <!--This plugin's configuration is used to store Eclipse
+                    m2e settings only. It has no influence on the Maven build itself. -->
                 <plugin>
                     <groupId>org.eclipse.m2e</groupId>
                     <artifactId>lifecycle-mapping</artifactId>
@@ -422,8 +411,7 @@
 
 
     <!-- ************************************************************************
-    * Dependencies
-    ************************************************************************* -->
+        * Dependencies ************************************************************************* -->
     <dependencies>
         <!-- eFaps kernel -->
         <dependency>
@@ -434,7 +422,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>0.9.28</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>javax.jms</groupId>
@@ -443,13 +431,13 @@
         </dependency>
 
 
-                    <dependency>
-                        <groupId>org.efaps</groupId>
-                        <artifactId>efaps-kernel</artifactId>
-                        <version>1.19.0</version>
-                        <type>test-jar</type>
-                        <scope>test</scope>
-                    </dependency>
+        <dependency>
+            <groupId>org.efaps</groupId>
+            <artifactId>efaps-kernel</artifactId>
+            <version>1.19.0</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>org.testng</groupId>
@@ -464,11 +452,9 @@
             <version>2.10.0</version>
             <scope>test</scope>
         </dependency>
-        <!--
-            used as javax.naming.* implementation
-            (needed to connect to eFaps database)
-        -->
-         <dependency>
+        <!-- used as javax.naming.* implementation (needed to connect to
+            eFaps database) -->
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-jndi</artifactId>
             <version>7.0.1.v20091125</version>
@@ -480,7 +466,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-util</artifactId>
             <version>7.0.1.v20091125</version>
@@ -509,7 +495,8 @@
                 </exclusion>
             </exclusions>
         </dependency>
-         <!-- replacement for the javax.resource.connector-api-1.5 needed by jotm-->
+        <!-- replacement for the javax.resource.connector-api-1.5 needed
+            by jotm -->
         <dependency>
             <groupId>org.ow2.spec.ee</groupId>
             <artifactId>ow2-connector-1.5-spec</artifactId>
@@ -548,5 +535,5 @@
             <version>3.2.5.Final</version>
             <scope>test</scope>
         </dependency>
-        </dependencies>
+    </dependencies>
 </project>
