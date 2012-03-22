@@ -23,15 +23,11 @@ package org.efaps.esjp.jms.actions;
 
 import java.util.ArrayList;
 
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlType;
 
 import org.efaps.esjp.jms.AbstractObject;
-import org.efaps.esjp.jms.contacts.Contact;
-import org.efaps.esjp.jms.products.StandartProduct;
-import org.efaps.esjp.jms.sales.Invoice;
 
 
 /**
@@ -45,9 +41,7 @@ public abstract class AbstractAction
     implements IAction
 {
     @XmlElements({
-        @XmlElement(name="invoice", type = Invoice.class),
-        @XmlElement(name="contact", type = Contact.class),
-        @XmlElement(name="standartproduct", type = StandartProduct.class)
+
     })
     @XmlElementWrapper
     private final ArrayList<AbstractObject> objects = new ArrayList<AbstractObject>();
