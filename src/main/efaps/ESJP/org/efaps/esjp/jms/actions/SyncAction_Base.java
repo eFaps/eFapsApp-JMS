@@ -18,6 +18,7 @@
  * Last Changed By: $Author$
  */
 
+
 package org.efaps.esjp.jms.actions;
 
 import java.lang.reflect.InvocationTargetException;
@@ -26,15 +27,16 @@ import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.efaps.db.Insert;
 import org.efaps.esjp.jms.AbstractObject;
 import org.efaps.esjp.jms.annotation.Attribute;
+import org.efaps.esjp.jms.annotation.MethodType;
 import org.efaps.esjp.jms.annotation.Type;
 import org.efaps.esjp.jms.attributes.IAttribute;
 import org.efaps.util.EFapsException;
+
 
 /**
  * TODO comment!
@@ -43,9 +45,8 @@ import org.efaps.util.EFapsException;
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "create")
-@XmlType(name = "action.create")
-public class Create
+@XmlType(name = "action.sync_base")
+public abstract class SyncAction_Base
     extends AbstractAction
 {
     /**
@@ -63,7 +64,7 @@ public class Create
                 for (final Method method : methods) {
                     if (method.isAnnotationPresent(Attribute.class)) {
                         final Attribute attributeAnno = method.getAnnotation(Attribute.class);
-                        if (attributeAnno != null) {
+                        if (attributeAnno != null && attributeAnno.method().equals(MethodType.GETTER)) {
                             try {
                                 final IAttribute<?> value = (IAttribute<?>) method.invoke(object);
                                 insert.add(attributeAnno.name(), value.getValue());

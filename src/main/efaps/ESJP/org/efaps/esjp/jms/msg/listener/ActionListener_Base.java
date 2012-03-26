@@ -43,7 +43,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
 import org.efaps.esjp.common.file.FileUtil;
-import org.efaps.esjp.jms.actions.Create;
+import org.efaps.esjp.jms.actions.SyncAction;
 import org.efaps.esjp.jms.actions.IAction;
 import org.efaps.esjp.jms.actions.Print;
 import org.efaps.util.EFapsException;
@@ -161,6 +161,6 @@ public abstract class ActionListener_Base
 
     protected Class<?>[] getClasses()
     {
-        return new Class[] { Create.class, Print.class };
+        return new Class[] { SyncAction.class, Print.class };
     }
 }

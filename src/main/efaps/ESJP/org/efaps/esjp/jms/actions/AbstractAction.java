@@ -36,7 +36,7 @@ import org.efaps.esjp.jms.AbstractObject;
  * @author The eFaps Team
  * @version $Id$
  */
-@XmlType(name="action.abstract")
+@XmlType(name = "action.abstract")
 public abstract class AbstractAction
     implements IAction
 {

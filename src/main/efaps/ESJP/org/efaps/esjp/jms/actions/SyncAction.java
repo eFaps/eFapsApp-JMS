@@ -18,11 +18,11 @@
  * Last Changed By: $Author$
  */
 
-package org.efaps.esjp.jms.attributes;
+package org.efaps.esjp.jms.actions;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -32,31 +32,10 @@ import javax.xml.bind.annotation.XmlType;
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name = "attribute.abstract")
-public abstract class AbstractAttribute<T>
-    implements IAttribute<T>
+@XmlRootElement(name = "sync")
+@XmlType(name = "action.sync")
+public class SyncAction
+    extends CreateAction_Base
 {
 
-    @XmlAttribute
-    private boolean print;
-
-    /**
-     * Getter method for the instance variable {@link #print}.
-     *
-     * @return value of instance variable {@link #print}
-     */
-    public boolean isPrintSelected()
-    {
-        return this.print;
-    }
-
-    /**
-     * Setter method for instance variable {@link #print}.
-     *
-     * @param _print value for instance variable {@link #print}
-     */
-    public void setPrintSelected(final boolean _print)
-    {
-        this.print = _print;
-    }
 }

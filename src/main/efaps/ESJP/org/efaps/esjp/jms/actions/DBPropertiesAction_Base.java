@@ -18,7 +18,6 @@
  * Last Changed By: $Author$
  */
 
-
 package org.efaps.esjp.jms.actions;
 
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import org.efaps.admin.dbproperty.DBProperties;
 import org.efaps.esjp.jms.kernel.DBProperty;
 import org.efaps.util.EFapsException;
 
-
 /**
  * TODO comment!
  *
@@ -41,10 +39,11 @@ import org.efaps.util.EFapsException;
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name="action.dbproperties_base")
+@XmlType(name = "action.dbproperties_base")
 public abstract class DBPropertiesAction_Base
     implements IAction, INoUserContextRequired
 {
+
     @XmlElement(name = "dbproperty")
     @XmlElementWrapper(name = "dbproperties")
     private final ArrayList<DBProperty> properties = new ArrayList<DBProperty>();

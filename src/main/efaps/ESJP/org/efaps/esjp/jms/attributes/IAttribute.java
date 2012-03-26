@@ -24,19 +24,31 @@ package org.efaps.esjp.jms.attributes;
 
 /**
  * TODO comment!
- *
+ * @param <T> Type of value for the attribute
  * @author The eFaps Team
  * @version $Id$
  */
 public interface IAttribute<T>
 {
-
-    public T getValue();
-
-    boolean isPrint();
+    /**
+     * @return the value for this attribute
+     */
+    T getValue();
 
     /**
-     * @param _value
+     * @param _value set the value for this attribute
      */
-    public void setValue(Object _value);
+    void setValue(Object _value);
+
+    /**
+     * @return true if the attribute is selected in a print, else false
+     */
+    boolean isPrintSelected();
+
+    /**
+     * Set if the attribute is selected in a print.
+     * @param selected or not
+     */
+    void setPrintSelected(final boolean _print);
+
 }

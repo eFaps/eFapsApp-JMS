@@ -18,25 +18,25 @@
  * Last Changed By: $Author$
  */
 
+
 package org.efaps.esjp.jms.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.efaps.db.PrintQuery;
+import org.efaps.db.Insert;
 import org.efaps.esjp.jms.AbstractObject;
 import org.efaps.esjp.jms.annotation.Attribute;
+import org.efaps.esjp.jms.annotation.MethodType;
 import org.efaps.esjp.jms.annotation.Type;
 import org.efaps.esjp.jms.attributes.IAttribute;
 import org.efaps.util.EFapsException;
+
 
 /**
  * TODO comment!
@@ -45,12 +45,10 @@ import org.efaps.util.EFapsException;
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "print")
-@XmlType(name = "action.print")
-public class Print
+@XmlType(name = "action.create_base")
+public abstract class CreateAction_Base
     extends AbstractAction
 {
-
     /**
      * {@inheritDoc}
      */
@@ -61,36 +59,29 @@ public class Print
         for (final AbstractObject object : getObjects()) {
             final Type typeAnno = object.getClass().getAnnotation(Type.class);
             if (typeAnno != null) {
-                final PrintQuery print = new PrintQuery(object.getOid());
+                final Insert insert = new Insert(UUID.fromString(typeAnno.uuid()));
                 final Method[] methods = object.getClass().getDeclaredMethods();
-                final Map<Attribute, IAttribute<?>> attributes = new HashMap<Attribute, IAttribute<?>>();
                 for (final Method method : methods) {
-                    final Attribute attributeAnno = method.getAnnotation(Attribute.class);
-                    if (attributeAnno != null) {
-                        try {
-                            final IAttribute<?> value = (IAttribute<?>) method.invoke(object);
-                            if (value.isPrintSelected()) {
-                                print.addAttribute(attributeAnno.name());
-                                attributes.put(attributeAnno, value);
+                    if (method.isAnnotationPresent(Attribute.class)) {
+                        final Attribute attributeAnno = method.getAnnotation(Attribute.class);
+                        if (attributeAnno != null && attributeAnno.method().equals(MethodType.GETTER)) {
+                            try {
+                                final IAttribute<?> value = (IAttribute<?>) method.invoke(object);
+                                insert.add(attributeAnno.name(), value.getValue());
+                            } catch (final IllegalArgumentException e) {
+                                throw new EFapsException("IllegalArgumentException", e);
+                            } catch (final IllegalAccessException e) {
+                                throw new EFapsException("IllegalAccessException", e);
+                            } catch (final InvocationTargetException e) {
+                                throw new EFapsException("InvocationTargetException", e);
                             }
-                        } catch (final IllegalArgumentException e) {
-                            throw new EFapsException("IllegalArgumentException", e);
-                        } catch (final IllegalAccessException e) {
-                            throw new EFapsException("IllegalAccessException", e);
-                        } catch (final InvocationTargetException e) {
-                            throw new EFapsException("InvocationTargetException", e);
                         }
                     }
                 }
-                if (print.execute()) {
-                    for (final Entry<Attribute, IAttribute<?>> entry : attributes.entrySet()) {
-                        final Object value = print.getAttribute(entry.getKey().name());
-                        entry.getValue().setValue(value);
-                    }
-                }
+                insert.execute();
+                object.setOid(insert.getInstance().getOid());
             }
         }
         return this;
     }
-
 }

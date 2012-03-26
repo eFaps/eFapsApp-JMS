@@ -41,6 +41,24 @@ public class StringAttribute
     @XmlAttribute
     private String value;
 
+
+    /**
+     * Standard Constructor.
+     */
+    public StringAttribute() {
+        super();
+    }
+
+    /**
+     * Constructor setting the value.
+     * @param _value value for this attribute
+     */
+    public StringAttribute(final String _value)
+    {
+       super();
+       this.value = _value;
+    }
+
     /**
      * Getter method for the instance variable {@link #value}.
      *
