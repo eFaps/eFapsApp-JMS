@@ -35,6 +35,7 @@ import org.efaps.db.PrintQuery;
 import org.efaps.esjp.jms.AbstractObject;
 import org.efaps.esjp.jms.annotation.Attribute;
 import org.efaps.esjp.jms.annotation.Type;
+import org.efaps.esjp.jms.attributes.AttrSetting;
 import org.efaps.esjp.jms.attributes.IAttribute;
 import org.efaps.util.EFapsException;
 
@@ -69,7 +70,7 @@ public class Print
                     if (attributeAnno != null) {
                         try {
                             final IAttribute<?> value = (IAttribute<?>) method.invoke(object);
-                            if (value.isPrintSelected()) {
+                            if (value.hasSetting(AttrSetting.PRINT_INCLUDE)) {
                                 print.addAttribute(attributeAnno.name());
                                 attributes.put(attributeAnno, value);
                             }

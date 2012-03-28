@@ -38,14 +38,17 @@ import javax.xml.bind.annotation.XmlType;
 public class StringAttribute
     extends AbstractAttribute<String>
 {
+    /**
+     * The actual value.
+     */
     @XmlAttribute
     private String value;
-
 
     /**
      * Standard Constructor.
      */
-    public StringAttribute() {
+    public StringAttribute()
+    {
         super();
     }
 
@@ -55,8 +58,8 @@ public class StringAttribute
      */
     public StringAttribute(final String _value)
     {
-       super();
-       this.value = _value;
+        super();
+        this.value = _value;
     }
 
     /**
@@ -72,7 +75,7 @@ public class StringAttribute
     /**
      * Setter method for instance variable {@link #value}.
      *
-     * @param value value for instance variable {@link #value}
+     * @param _value value for instance variable {@link #value}
      */
 
     public void setValue(final Object _value)

@@ -21,6 +21,8 @@
 
 package org.efaps.esjp.jms.attributes;
 
+import java.util.EnumSet;
+
 
 /**
  * TODO comment!
@@ -41,14 +43,25 @@ public interface IAttribute<T>
     void setValue(Object _value);
 
     /**
-     * @return true if the attribute is selected in a print, else false
+     * Add a setting to this attribute.
+     *
+     * @param _attrSettings settings for this Attribute
+     * @return the Attribute itself
      */
-    boolean isPrintSelected();
+    IAttribute<T> addSetting(final EnumSet<AttrSetting> _attrSettings);
 
     /**
-     * Set if the attribute is selected in a print.
-     * @param selected or not
+     * Check if this attribute contains a given Setting.
+     * @param _attrSetting the setting to check for
+     * @return has this attribute the given setting
      */
-    void setPrintSelected(final boolean _print);
+    boolean hasSetting(final AttrSetting _attrSetting);
+
+    /**
+     * Check if this attribute contains the given Settings.
+     * @param _attrSetting the settings to check for
+     * @return has this attribute the given setting
+     */
+    boolean hasSettings(final EnumSet<AttrSetting> _attrSetting);
 
 }

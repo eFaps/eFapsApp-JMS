@@ -18,31 +18,33 @@
  * Last Changed By: $Author$
  */
 
-package org.efaps.esjp.jms.actions;
+
+package org.efaps.esjp.jms.attributes;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-import org.efaps.admin.program.esjp.EFapsRevision;
-import org.efaps.admin.program.esjp.EFapsUUID;
 
 /**
- * This class must be replaced for customization, therefore it is left empty.
- * Functional description can be found in the related "<code>_base</code>"
- * class.
+ * TODO comment!
  *
  * @author The eFaps Team
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "sync")
-@XmlType(name = "action.sync")
-@EFapsUUID("79174cc4-532c-4c52-bc4f-7c45391dcb50")
-@EFapsRevision("$Rev$")
-public class SyncAction
-    extends SyncAction_Base
+@XmlType(name = "attribute.restrictions")
+@XmlEnum(String.class)
+public enum AttrSetting
 {
+    /**
+     * The Attribute must be included in an print.
+     */
+    PRINT_INCLUDE,
 
+    /**
+     * The Attribute must be included in the check and update.
+     */
+    SYNC_INCLUDE;
 }

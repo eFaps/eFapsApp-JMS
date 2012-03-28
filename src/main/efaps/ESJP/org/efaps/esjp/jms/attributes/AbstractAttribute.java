@@ -20,14 +20,18 @@
 
 package org.efaps.esjp.jms.attributes;
 
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
  * TODO comment!
- *
+ * @param <T> Object type
  * @author The eFaps Team
  * @version $Id$
  */
@@ -37,26 +41,38 @@ public abstract class AbstractAttribute<T>
     implements IAttribute<T>
 {
 
-    @XmlAttribute
-    private boolean print;
+    /**
+     * The set of restrictions for this Attribute.
+     */
+    @XmlElement
+    private final Set<AttrSetting> attrSettings = new HashSet<AttrSetting>();
 
     /**
-     * Getter method for the instance variable {@link #print}.
-     *
-     * @return value of instance variable {@link #print}
+     * {@inheritDoc}
      */
-    public boolean isPrintSelected()
+    @Override
+    public AbstractAttribute<T> addSetting(final EnumSet<AttrSetting> _attrSettings)
     {
-        return this.print;
+        this.attrSettings.addAll(_attrSettings);
+        return this;
     }
 
     /**
-     * Setter method for instance variable {@link #print}.
-     *
-     * @param _print value for instance variable {@link #print}
+     * {@inheritDoc}
      */
-    public void setPrintSelected(final boolean _print)
+    @Override
+    public boolean hasSetting(final AttrSetting _attrSetting)
     {
-        this.print = _print;
+        return this.attrSettings.contains(_attrSetting);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasSettings(final EnumSet<AttrSetting> _attrSettings)
+    {
+        return this.attrSettings.contains(_attrSettings);
     }
 }
+

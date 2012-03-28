@@ -40,6 +40,7 @@ import org.efaps.db.Context;
 import org.efaps.esjp.jms.actions.DBPropertiesAction;
 import org.efaps.esjp.jms.actions.INoUserContextRequired;
 import org.efaps.esjp.jms.actions.Login;
+import org.efaps.esjp.jms.actions.SyncAction;
 import org.efaps.jms.JmsHandler;
 import org.efaps.jms.JmsHandler.JmsDefinition;
 import org.efaps.jms.JmsSession;
@@ -82,45 +83,55 @@ public abstract class AbstractContextListener_Base
         try {
             AbstractContextListener_Base.LOG.debug("Recieved Message: {}", _msg.getJMSMessageID());
             sessionKey = _msg.getStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME);
+            final Queue queue = (Queue) _msg.getJMSDestination();
+            JmsHandler.getJmsDefinition(queue.getQueueName());
+            // speichern aller queues
+            final boolean secure = true;
             try {
-                if (sessionKey == null) {
-                    final TextMessage msg = (TextMessage) _msg;
-                    final String xml = msg.getText();
-                    // open a context, because the classes are loaded from the eFaspClassLoader and this loader
-                    // needs a database connection
-                    if (!Context.isTMActive()) {
-                        Context.begin(null, false);
-                    }
-                    //to ensure that the inner class is loaded
-                    ERROCODE.SESSIONTIMEOUT.name();
-                    final JAXBContext jc = JAXBContext.newInstance(getNoLoginClasses());
-                    final Unmarshaller unmarschaller = jc.createUnmarshaller();
-                    final Source source = new StreamSource(new StringReader(xml));
-                    final Object reqObject = unmarschaller.unmarshal(source);
-                    if (reqObject != null && reqObject instanceof Login) {
-                        final Login loginObject = (Login) reqObject;
-                        sessionKey = JmsSession.login(loginObject.getUserName(), loginObject.getPassword(),
-                                        loginObject.getApplicationKey());
-                    } else if (reqObject instanceof INoUserContextRequired) {
-                        AbstractContextListener_Base.LOG.debug("Executing INoUserContextRequired: '{}'", reqObject);
-                        retObject = onSessionMessage(_msg);
-                    }
-                    if (Context.isThreadActive() && Context.isTMActive()) {
-                        AbstractContextListener_Base.LOG.debug("perfoming rollback");
-                        Context.rollback();
-                    }
+                if (secure) {
+                    Context.begin("Administrator", false);
+                    retObject = onSessionMessage(_msg);
+                    Context.commit();
                 } else {
-                    AbstractContextListener_Base.LOG.debug("Recieved SessionKey: '{}'", sessionKey);
-                    final JmsSession session = JmsSession.getSession(sessionKey);
-                    if (session == null) {
-                        errorMsg = ERROCODE.SESSIONTIMEOUT.name();
+                    if (sessionKey == null) {
+                        final TextMessage msg = (TextMessage) _msg;
+                        final String xml = msg.getText();
+                        // open a context, because the classes are loaded from the eFaspClassLoader and this loader
+                        // needs a database connection
+                        if (!Context.isTMActive()) {
+                            Context.begin(null, false);
+                        }
+                        //to ensure that the inner class is loaded
+                        ERROCODE.SESSIONTIMEOUT.name();
+                        final JAXBContext jc = JAXBContext.newInstance(getNoLoginClasses());
+                        final Unmarshaller unmarschaller = jc.createUnmarshaller();
+                        final Source source = new StreamSource(new StringReader(xml));
+                        final Object reqObject = unmarschaller.unmarshal(source);
+                        if (reqObject != null && reqObject instanceof Login) {
+                            final Login loginObject = (Login) reqObject;
+                            sessionKey = JmsSession.login(loginObject.getUserName(), loginObject.getPassword(),
+                                            loginObject.getApplicationKey());
+                        } else if (reqObject instanceof INoUserContextRequired) {
+                            AbstractContextListener_Base.LOG.debug("Executing INoUserContextRequired: '{}'", reqObject);
+                            retObject = onSessionMessage(_msg);
+                        }
+                        if (Context.isThreadActive() && Context.isTMActive()) {
+                            AbstractContextListener_Base.LOG.debug("perfoming rollback");
+                            Context.rollback();
+                        }
                     } else {
-                        session.openContext();
-                        retObject = onSessionMessage(_msg);
-                        session.closeContext();
+                        AbstractContextListener_Base.LOG.debug("Recieved SessionKey: '{}'", sessionKey);
+                        final JmsSession session = JmsSession.getSession(sessionKey);
+                        if (session == null) {
+                            errorMsg = ERROCODE.SESSIONTIMEOUT.name();
+                        } else {
+                            session.openContext();
+                            retObject = onSessionMessage(_msg);
+                            session.closeContext();
+                        }
+                        // the session key will not be returned
+                        sessionKey = null;
                     }
-                    // the session key will not be returned
-                    sessionKey = null;
                 }
             } catch (final JMSException e) {
                 AbstractContextListener_Base.LOG.error("JMSException", e);
@@ -217,7 +228,7 @@ public abstract class AbstractContextListener_Base
 
     protected Class<?>[] getNoLoginClasses()
     {
-        return new Class[] { Login.class, DBPropertiesAction.class };
+        return new Class[] { Login.class, DBPropertiesAction.class, SyncAction.class };
     }
 
     protected abstract Object onSessionMessage(final Message _msg);

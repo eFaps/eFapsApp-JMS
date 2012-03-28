@@ -20,6 +20,8 @@
 
 package org.efaps.esjp.jms;
 
+import java.util.UUID;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -35,9 +37,65 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class AbstractObject
 {
-
+    /**
+     * OID of this Object.
+     */
     @XmlAttribute(name = "oid")
     private String oid;
+
+    /**
+     * Syncid of this Object. Only used for syncing.
+     */
+    @XmlAttribute(name = "syncid")
+    private String syncid;
+
+    /**
+     * In case of a  sync the UUID for the type is mandatory
+     * to garantisize correct syncing.
+     */
+    @XmlAttribute(name = "typeUUID")
+    private UUID typeUUID;
+
+    /**
+     * Getter method for the instance variable {@link #typeUUID}.
+     *
+     * @return value of instance variable {@link #typeUUID}
+     */
+    public UUID getTypeUUID()
+    {
+        return this.typeUUID;
+    }
+
+    /**
+     * Setter method for instance variable {@link #typeUUID}.
+     *
+     * @param _typeUUID value for instance variable {@link #typeUUID}
+     */
+
+    public void setTypeUUID(final UUID _typeUUID)
+    {
+        this.typeUUID = _typeUUID;
+    }
+
+    /**
+     * Getter method for the instance variable {@link #syncid}.
+     *
+     * @return value of instance variable {@link #syncid}
+     */
+    public String getSyncid()
+    {
+        return this.syncid;
+    }
+
+    /**
+     * Setter method for instance variable {@link #syncid}.
+     *
+     * @param _syncid value for instance variable {@link #syncid}
+     */
+    public void setSyncid(final String _syncid)
+    {
+        this.syncid = _syncid;
+    }
 
     /**
      * Getter method for the instance variable {@link #oid}.
@@ -54,7 +112,6 @@ public abstract class AbstractObject
      *
      * @param _oid value for instance variable {@link #oid}
      */
-
     public void setOid(final String _oid)
     {
         this.oid = _oid;
@@ -65,6 +122,7 @@ public abstract class AbstractObject
     {
         return new ToStringBuilder(this)
                         .append("oid", this.oid)
+                        .append("syncid", this.syncid)
                         .toString();
     }
 }
