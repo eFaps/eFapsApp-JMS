@@ -22,9 +22,10 @@
 package org.efaps.esjp.jms.actions;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlType;
 
 import org.efaps.esjp.jms.AbstractObject;
@@ -40,18 +41,20 @@ import org.efaps.esjp.jms.AbstractObject;
 public abstract class AbstractAction
     implements IAction
 {
-    @XmlElements({
-
-    })
+    /**
+     * The objects used in this action.
+     */
     @XmlElementWrapper
-    private final ArrayList<AbstractObject> objects = new ArrayList<AbstractObject>();
+    @XmlElementRef(name = "objects")
+    private final List<AbstractObject> objects = new ArrayList<AbstractObject>();
+
 
     /**
      * Getter method for the instance variable {@link #objects}.
      *
      * @return value of instance variable {@link #objects}
      */
-    public ArrayList<AbstractObject> getObjects()
+    public List<AbstractObject> getObjects()
     {
         return this.objects;
     }

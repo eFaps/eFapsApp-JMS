@@ -20,11 +20,15 @@
 
 package org.efaps.esjp.jms;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -34,6 +38,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
  * @author The eFaps Team
  * @version $Id$
  */
+@XmlRootElement(name = "abstractobject")
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class AbstractObject
 {
@@ -50,31 +55,20 @@ public abstract class AbstractObject
     private String syncid;
 
     /**
-     * In case of a  sync the UUID for the type is mandatory
-     * to garantisize correct syncing.
+     * The objects classifying this object.
      */
-    @XmlAttribute(name = "typeUUID")
-    private UUID typeUUID;
+    @XmlElementWrapper
+    @XmlElementRef(name = "classifications")
+    private final List<AbstractObject> classifications = new ArrayList<AbstractObject>();
 
     /**
-     * Getter method for the instance variable {@link #typeUUID}.
+     * Getter method for the instance variable {@link #classifications}.
      *
-     * @return value of instance variable {@link #typeUUID}
+     * @return value of instance variable {@link #classifications}
      */
-    public UUID getTypeUUID()
+    public List<AbstractObject> getClassifications()
     {
-        return this.typeUUID;
-    }
-
-    /**
-     * Setter method for instance variable {@link #typeUUID}.
-     *
-     * @param _typeUUID value for instance variable {@link #typeUUID}
-     */
-
-    public void setTypeUUID(final UUID _typeUUID)
-    {
-        this.typeUUID = _typeUUID;
+        return this.classifications;
     }
 
     /**

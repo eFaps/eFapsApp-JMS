@@ -19,13 +19,11 @@
  */
 
 
-package org.efaps.esjp.jms.annotation;
+package org.efaps.esjp.jms;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 
 /**
@@ -34,13 +32,10 @@ import java.lang.annotation.Target;
  * @author The eFaps Team
  * @version $Id$
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Type
+@XmlRootElement(name = "abstractclassificationobject")
+@XmlAccessorType(XmlAccessType.NONE)
+public class AbstractClassificationObject
+    extends AbstractObject
 {
-    /**
-     * UUID of the eFaps Type
-     */
-    String uuid();
+
 }
