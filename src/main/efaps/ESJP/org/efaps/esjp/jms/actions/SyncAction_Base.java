@@ -79,7 +79,7 @@ public abstract class SyncAction_Base
         for (final AbstractObject object : getObjects()) {
             final Type typeAnno = object.getClass().getAnnotation(Type.class);
             if (typeAnno != null) {
-                final Map<Attribute, IAttribute<?>> attributes = getAttributes(object);
+                final Map<Attribute, IAttribute<?>> attributes = getAttributes(object, null);
 
                 final String syncids = object.getSyncid();
                 final String masterIdStr = syncids.split(":")[0];
@@ -104,7 +104,8 @@ public abstract class SyncAction_Base
                     if (multi.next()) {
                         throw new EFapsException(this.getClass(), "multipleResults4SyncId", syncids);
                     }
-                    // check if the given Type from the ScynAction is the same type returned from the Query
+                    // check if the given Type from the ScynAction is the same
+                    // type returned from the Query
                     if (!updateinst.getType().getUUID().equals(UUID.fromString(typeAnno.uuid()))) {
                         throw new EFapsException(this.getClass(), "differentTypes", syncids);
                     }
@@ -132,10 +133,13 @@ public abstract class SyncAction_Base
      * Get the Attributes for the Object.
      *
      * @param _object object the attributes are wanted for
+     * @param _declaringClass if this parameter is given, it is also evaluated
+     *            if the method actual belongs to the given class
      * @return Map of Annotation 2 Attribute
      * @throws EFapsException on error
      */
-    protected Map<Attribute, IAttribute<?>> getAttributes(final AbstractObject _object)
+    protected Map<Attribute, IAttribute<?>> getAttributes(final AbstractObject _object,
+                                                          final Class<?> _declaringClass)
         throws EFapsException
     {
 
@@ -145,7 +149,8 @@ public abstract class SyncAction_Base
         for (final Method method : methods) {
             if (method.isAnnotationPresent(Attribute.class)) {
                 final Attribute attributeAnno = method.getAnnotation(Attribute.class);
-                if (attributeAnno != null && attributeAnno.method().equals(MethodType.GETTER)) {
+                if (attributeAnno != null && attributeAnno.method().equals(MethodType.GETTER)
+                                && (_declaringClass == null || _declaringClass.equals(method.getDeclaringClass()))) {
                     try {
                         final IAttribute<?> attribute = (IAttribute<?>) method.invoke(_object);
                         ret.put(attributeAnno, attribute);
@@ -164,22 +169,24 @@ public abstract class SyncAction_Base
 
     /**
      * Sync the classifications for an object.<br/>
-     * In case of a classification the syncid does not matter. It must only be checked if the classification already
-     * exists or not. If it does not exist a new one must be created, else the existing one must be updated. A
-     * Classification is not treated as an Object that must be synchronized but as a part of an object. Therefore only
-     * the syncid of the object the Classification belongs to is used.
+     * In case of a classification the syncid does not matter. It must only be
+     * checked if the classification already exists or not. If it does not exist
+     * a new one must be created, else the existing one must be updated. A
+     * Classification is not treated as an Object that must be synchronized but
+     * as a part of an object. Therefore only the syncid of the object the
+     * Classification belongs to is used.
      *
      * @param _object Object the classification must be synced for
      * @throws EFapsException on error
      */
-    // TODO what must be done if a classification exists in the target but not in the syncobject
+    // TODO what must be done if a classification exists in the target but not
+    // in the syncobject
     protected void syncClassifcation(final AbstractObject _object)
         throws EFapsException
     {
         if (!_object.getClassifications().isEmpty()) {
-            final PrintQuery print = new PrintQuery(_object.getOid());
-
             for (final AbstractClassificationObject classification : _object.getClassifications()) {
+                final PrintQuery print = new PrintQuery(_object.getOid());
                 // TODO check if this classification is allowed at all
                 final Type typeAnno = classification.getClass().getAnnotation(Type.class);
                 final SelectBuilder selBldr = new SelectBuilder()
@@ -213,22 +220,25 @@ public abstract class SyncAction_Base
         throws EFapsException
     {
         final Type typeAnno = _classification.getClass().getAnnotation(Type.class);
-        final Map<Attribute, IAttribute<?>> attributes = getAttributes(_classification);
-        checkSettings4insert(attributes);
 
-        final Classification clazz = (Classification) org.efaps.admin.datamodel.Type.get(UUID.fromString(typeAnno.uuid()));
+        final Classification clazz = (Classification) org.efaps.admin.datamodel.Type.get(UUID.fromString(typeAnno
+                        .uuid()));
 
         final Instance objectInst = Instance.get(_object.getOid());
 
         // if the classification does not exist yet the relation must be
         // created, and the new instance of the classification inserted
+        final Map<Classification, Class<?>> clazz2class = new HashMap<Classification, Class<?>>();
+        clazz2class.put(clazz, _classification.getClass());
         final List<Classification> clazzes = new ArrayList<Classification>();
         clazzes.add(clazz);
         Classification clazzTmp = clazz;
         while (clazzTmp != null) {
+            final Class<?> clss = clazz2class.get(clazzTmp);
             clazzTmp = (Classification) clazzTmp.getParentClassification();
             if (clazzTmp != null) {
                 clazzes.add(clazzTmp);
+                clazz2class.put(clazzTmp, clss.getSuperclass());
             }
         }
         Collections.reverse(clazzes);
@@ -238,15 +248,14 @@ public abstract class SyncAction_Base
             relInsert.add(clazzRel.getRelTypeAttributeName(), clazzRel.getId());
             relInsert.execute();
 
+            final Map<Attribute, IAttribute<?>> attributes = getAttributes(_classification, clazz2class.get(clazzRel));
+            checkSettings4insert(attributes);
+            final Insert insert = new Insert(clazzRel);
+            insert.add(clazzRel.getLinkAttributeName(), ((Long) objectInst.getId()).toString());
+            add4insert(insert, attributes);
+            insert.execute();
+            _classification.setOid(insert.getInstance().getOid());
         }
-
-        final Insert insert = new Insert(UUID.fromString(typeAnno.uuid()));
-        insert.add(clazz.getLinkAttributeName(), ((Long) objectInst.getId()).toString());
-        add4insert(insert, attributes);
-        insert.execute();
-
-        _classification.setOid(insert.getInstance().getOid());
-
     }
 
     /**
@@ -263,7 +272,7 @@ public abstract class SyncAction_Base
         throws EFapsException
     {
         final Instance instance = Instance.get(_classification.getOid());
-        final Map<Attribute, IAttribute<?>> attributes = getAttributes(_classification);
+        final Map<Attribute, IAttribute<?>> attributes = getAttributes(_classification, null);
         if (checkSettings4update(attributes) && validate4update(instance, attributes)) {
             final Update update = new Update(instance);
             add4update(update, attributes);
