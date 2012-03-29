@@ -35,8 +35,8 @@ import javax.jms.TextMessage;
 
 import org.efaps.admin.runlevel.RunLevel;
 import org.efaps.db.Context;
-import org.efaps.esjp.jms.msg.listener.AbstractContextListener_Base;
-import org.efaps.esjp.jms.msg.listener.ActionListener;
+import org.efaps.esjp.jms.msg.listener.AbstractSessionListener_Base;
+import org.efaps.esjp.jms.msg.listener.SessionActionListener;
 import org.efaps.jaas.AppAccessHandler;
 import org.efaps.jms.JmsHandler;
 import org.efaps.jms.JmsHandler.JmsDefinition;
@@ -131,7 +131,7 @@ public class AbstractJmsTest
 
         // register efaps to recieve request
         final MessageConsumer messageConsumer = getSession().createConsumer(getRequestQueue());
-        messageConsumer.setMessageListener(new ActionListener());
+        messageConsumer.setMessageListener(new SessionActionListener());
         // register a resond in efaps
         JmsHandler.addJmsDefintion(new JmsDefinition(getRespondQueue().getQueueName(), getRespondProducer(),
                         this.session));
@@ -172,7 +172,7 @@ public class AbstractJmsTest
         final MessageConsumer messageConsumer = getSession().createConsumer(getRespondQueue());
         final Message respondMsg = messageConsumer.receive();
 
-        AbstractJmsTest.this.sessionKey = respondMsg.getStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME);
+        AbstractJmsTest.this.sessionKey = respondMsg.getStringProperty(AbstractSessionListener_Base.SESSIONKEY_PROPNAME);
         messageConsumer.close();
     }
 

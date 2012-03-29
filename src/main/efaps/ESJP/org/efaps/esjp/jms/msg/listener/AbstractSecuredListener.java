@@ -21,15 +21,22 @@
 
 package org.efaps.esjp.jms.msg.listener;
 
+import org.efaps.admin.program.esjp.EFapsRevision;
+import org.efaps.admin.program.esjp.EFapsUUID;
+
 
 /**
- * TODO comment!
+ * This class must be replaced for customization, therefore it is left empty.
+ * Functional description can be found in the related "<code>_base</code>"
+ * class.
  *
  * @author The eFaps Team
  * @version $Id$
  */
-public class ActionListener
-    extends ActionListener_Base
+@EFapsUUID("57e59037-1caa-4226-895a-5a14af44c0d5")
+@EFapsRevision("$Rev$")
+public abstract class AbstractSecuredListener
+    extends AbstractSecuredListener_Base
 {
 
 }

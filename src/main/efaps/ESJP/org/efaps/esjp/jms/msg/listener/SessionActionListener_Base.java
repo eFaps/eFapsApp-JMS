@@ -42,20 +42,24 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import org.efaps.admin.program.esjp.EFapsRevision;
+import org.efaps.admin.program.esjp.EFapsUUID;
 import org.efaps.esjp.common.file.FileUtil;
-import org.efaps.esjp.jms.actions.SyncAction;
 import org.efaps.esjp.jms.actions.IAction;
-import org.efaps.esjp.jms.actions.Print;
 import org.efaps.util.EFapsException;
 
 /**
- * TODO comment!
+ * This class must be replaced for customization, therefore it is left empty.
+ * Functional description can be found in the related "<code>_base</code>"
+ * class.
  *
  * @author The eFaps Team
  * @version $Id$
  */
-public abstract class ActionListener_Base
-    extends AbstractContextListener
+@EFapsUUID("1af5fdd5-de2c-4aea-8c17-e0fb8d524c55")
+@EFapsRevision("$Rev$")
+public abstract class SessionActionListener_Base
+    extends AbstractSessionListener
 {
     /**
      * {@inheritDoc}
@@ -68,7 +72,7 @@ public abstract class ActionListener_Base
             if (_msg instanceof TextMessage) {
                 final TextMessage msg = (TextMessage) _msg;
                 final String xml = msg.getText();
-                AbstractContextListener_Base.LOG.debug("unmarshalling: {} ", xml);
+                AbstractSessionListener_Base.LOG.debug("unmarshalling: {} ", xml);
                 final JAXBContext jc = JAXBContext.newInstance(getClasses());
                 final Unmarshaller unmarschaller = jc.createUnmarshaller();
                 final Source source = new StreamSource(new StringReader(xml));
@@ -76,7 +80,7 @@ public abstract class ActionListener_Base
             } else if (_msg instanceof BytesMessage) {
                 final FileUtil fileUtil = new FileUtil();
                 final File file = fileUtil.getFile(_msg
-                                .getStringProperty(AbstractContextListener_Base.FILENAME_PROPNAME));
+                                .getStringProperty(AbstractSessionListener_Base.FILENAME_PROPNAME));
                 final FileOutputStream fos = new FileOutputStream(file);
                 final BufferedOutputStream outBuf = new BufferedOutputStream(fos);
                 int i;
@@ -91,15 +95,15 @@ public abstract class ActionListener_Base
                 object = action.execute();
             }
         } catch (final JMSException e) {
-            AbstractContextListener_Base.LOG.error("JMSException", e);
+            AbstractSessionListener_Base.LOG.error("JMSException", e);
         } catch (final JAXBException e) {
-            AbstractContextListener_Base.LOG.error("JAXBException", e);
+            AbstractSessionListener_Base.LOG.error("JAXBException", e);
         } catch (final EFapsException e) {
-            AbstractContextListener_Base.LOG.error("EFapsException", e);
+            AbstractSessionListener_Base.LOG.error("EFapsException", e);
         } catch (final FileNotFoundException e) {
-            AbstractContextListener_Base.LOG.error("FileNotFoundException", e);
+            AbstractSessionListener_Base.LOG.error("FileNotFoundException", e);
         } catch (final IOException e) {
-            AbstractContextListener_Base.LOG.error("IOException", e);
+            AbstractSessionListener_Base.LOG.error("IOException", e);
         }
         return object;
     }
@@ -115,15 +119,15 @@ public abstract class ActionListener_Base
         throws JMSException
     {
         try {
-            final JAXBContext jc = JAXBContext.newInstance(getClasses());
+            final JAXBContext jc = getJAXBContext();
             final Marshaller marschaller = jc.createMarshaller();
             marschaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
             final StringWriter xml = new StringWriter();
             marschaller.marshal(_object, xml);
             _msg.setText(xml.toString());
-            AbstractContextListener_Base.LOG.debug("setting text: {}", xml);
+            AbstractSessionListener_Base.LOG.debug("setting text: {}", xml);
         } catch (final JAXBException e) {
-            AbstractContextListener_Base.LOG.error("JAXBException", e);
+            AbstractSessionListener_Base.LOG.error("JAXBException", e);
         }
     }
 
@@ -157,10 +161,5 @@ public abstract class ActionListener_Base
             }
 
         }
-    }
-
-    protected Class<?>[] getClasses()
-    {
-        return new Class[] { SyncAction.class, Print.class };
     }
 }

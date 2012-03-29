@@ -57,16 +57,16 @@ public abstract class AbstractObject
     /**
      * The objects classifying this object.
      */
-    @XmlElementWrapper
-    @XmlElementRef(name = "classifications")
-    private final List<AbstractObject> classifications = new ArrayList<AbstractObject>();
+    @XmlElementWrapper(name = "classifications")
+    @XmlElementRef
+    private final List<AbstractClassificationObject> classifications = new ArrayList<AbstractClassificationObject>();
 
     /**
      * Getter method for the instance variable {@link #classifications}.
      *
      * @return value of instance variable {@link #classifications}
      */
-    public List<AbstractObject> getClassifications()
+    public List<AbstractClassificationObject> getClassifications()
     {
         return this.classifications;
     }

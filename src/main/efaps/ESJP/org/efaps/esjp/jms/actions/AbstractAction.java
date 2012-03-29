@@ -44,8 +44,8 @@ public abstract class AbstractAction
     /**
      * The objects used in this action.
      */
-    @XmlElementWrapper
-    @XmlElementRef(name = "objects")
+    @XmlElementWrapper(name = "objects")
+    @XmlElementRef
     private final List<AbstractObject> objects = new ArrayList<AbstractObject>();
 
 

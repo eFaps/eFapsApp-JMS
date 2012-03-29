@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
+ * Revision:        $Rev: 7438 $
+ * Last Changed:    $Date: 2012-03-27 22:40:10 -0500 (Tue, 27 Mar 2012) $
+ * Last Changed By: $Author: jan@moxter.net $
  */
 
 package org.efaps.esjp.jms.msg.listener;
@@ -27,7 +27,6 @@ import javax.jms.BytesMessage;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageListener;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.xml.bind.JAXBContext;
@@ -36,11 +35,11 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
+import org.efaps.admin.program.esjp.EFapsRevision;
+import org.efaps.admin.program.esjp.EFapsUUID;
 import org.efaps.db.Context;
-import org.efaps.esjp.jms.actions.DBPropertiesAction;
 import org.efaps.esjp.jms.actions.INoUserContextRequired;
 import org.efaps.esjp.jms.actions.Login;
-import org.efaps.esjp.jms.actions.SyncAction;
 import org.efaps.jms.JmsHandler;
 import org.efaps.jms.JmsHandler.JmsDefinition;
 import org.efaps.jms.JmsSession;
@@ -49,13 +48,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A listener which opens a Context on a receiving a Message and closes it after the execution of the subclasses.
+ * A listener which work with a user Session and opens a Context
+ * on a receiving a Message and closes it after the execution of
+ * the subclasses.
  *
  * @author The eFaps Team
- * @version $Id$
+ * @version $Id: AbstractContextListener_Base.java 7438 2012-03-28 03:40:10Z jan@moxter.net $
  */
-public abstract class AbstractContextListener_Base
-    implements MessageListener
+@EFapsUUID("7e3f555b-a293-47d7-be15-2f4fc80eecbb")
+@EFapsRevision("$Rev: 7438 $")
+public abstract class AbstractSessionListener_Base
+    extends AbstractListener
 {
 
     public final static String SESSIONKEY_PROPNAME = "SessionKey";
@@ -72,7 +75,7 @@ public abstract class AbstractContextListener_Base
     /**
      * Logging instance used in this class.
      */
-    protected static final Logger LOG = LoggerFactory.getLogger(AbstractContextListener_Base.class);
+    protected static final Logger LOG = LoggerFactory.getLogger(AbstractSessionListener_Base.class);
 
     @Override
     public void onMessage(final Message _msg)
@@ -81,66 +84,57 @@ public abstract class AbstractContextListener_Base
         String sessionKey = null;
         String errorMsg = null;
         try {
-            AbstractContextListener_Base.LOG.debug("Recieved Message: {}", _msg.getJMSMessageID());
-            sessionKey = _msg.getStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME);
-            final Queue queue = (Queue) _msg.getJMSDestination();
-            JmsHandler.getJmsDefinition(queue.getQueueName());
-            // speichern aller queues
-            final boolean secure = true;
+            AbstractSessionListener_Base.LOG.debug("Recieved Message: {}", _msg.getJMSMessageID());
+            sessionKey = _msg.getStringProperty(AbstractSessionListener_Base.SESSIONKEY_PROPNAME);
             try {
-                if (secure) {
-                    Context.begin("Administrator", false);
-                    retObject = onSessionMessage(_msg);
-                    Context.commit();
-                } else {
-                    if (sessionKey == null) {
-                        final TextMessage msg = (TextMessage) _msg;
-                        final String xml = msg.getText();
-                        // open a context, because the classes are loaded from the eFaspClassLoader and this loader
-                        // needs a database connection
-                        if (!Context.isTMActive()) {
-                            Context.begin(null, false);
-                        }
-                        //to ensure that the inner class is loaded
-                        ERROCODE.SESSIONTIMEOUT.name();
-                        final JAXBContext jc = JAXBContext.newInstance(getNoLoginClasses());
-                        final Unmarshaller unmarschaller = jc.createUnmarshaller();
-                        final Source source = new StreamSource(new StringReader(xml));
-                        final Object reqObject = unmarschaller.unmarshal(source);
-                        if (reqObject != null && reqObject instanceof Login) {
-                            final Login loginObject = (Login) reqObject;
-                            sessionKey = JmsSession.login(loginObject.getUserName(), loginObject.getPassword(),
-                                            loginObject.getApplicationKey());
-                        } else if (reqObject instanceof INoUserContextRequired) {
-                            AbstractContextListener_Base.LOG.debug("Executing INoUserContextRequired: '{}'", reqObject);
-                            retObject = onSessionMessage(_msg);
-                        }
-                        if (Context.isThreadActive() && Context.isTMActive()) {
-                            AbstractContextListener_Base.LOG.debug("perfoming rollback");
-                            Context.rollback();
-                        }
-                    } else {
-                        AbstractContextListener_Base.LOG.debug("Recieved SessionKey: '{}'", sessionKey);
-                        final JmsSession session = JmsSession.getSession(sessionKey);
-                        if (session == null) {
-                            errorMsg = ERROCODE.SESSIONTIMEOUT.name();
-                        } else {
-                            session.openContext();
-                            retObject = onSessionMessage(_msg);
-                            session.closeContext();
-                        }
-                        // the session key will not be returned
-                        sessionKey = null;
+                if (sessionKey == null) {
+                    final TextMessage msg = (TextMessage) _msg;
+                    final String xml = msg.getText();
+                    // open a context, because the classes are loaded from the eFaspClassLoader and this loader
+                    // needs a database connection
+                    if (!Context.isTMActive()) {
+                        Context.begin(null, false);
                     }
+                    // to ensure that the inner class is loaded
+                    ERROCODE.SESSIONTIMEOUT.name();
+                    final JAXBContext jc = getJAXBContext();
+                    final Unmarshaller unmarschaller = jc.createUnmarshaller();
+                    final Source source = new StreamSource(new StringReader(xml));
+                    final Object reqObject = unmarschaller.unmarshal(source);
+                    if (reqObject != null && reqObject instanceof Login) {
+                        final Login loginObject = (Login) reqObject;
+                        sessionKey = JmsSession.login(loginObject.getUserName(), loginObject.getPassword(),
+                                        loginObject.getApplicationKey());
+                    } else if (reqObject instanceof INoUserContextRequired) {
+                        AbstractSessionListener_Base.LOG.debug("Executing INoUserContextRequired: '{}'", reqObject);
+                        retObject = onSessionMessage(_msg);
+                    }
+                    if (Context.isThreadActive() && Context.isTMActive()) {
+                        AbstractSessionListener_Base.LOG.debug("perfoming rollback");
+                        Context.rollback();
+                    }
+                } else {
+                    AbstractSessionListener_Base.LOG.debug("Recieved SessionKey: '{}'", sessionKey);
+                    final JmsSession session = JmsSession.getSession(sessionKey);
+                    if (session == null) {
+                        errorMsg = ERROCODE.SESSIONTIMEOUT.name();
+                    } else {
+                        session.openContext();
+                        retObject = onSessionMessage(_msg);
+                        session.closeContext();
+                    }
+                    // the session key will not be returned
+                    sessionKey = null;
                 }
+
             } catch (final JMSException e) {
-                AbstractContextListener_Base.LOG.error("JMSException", e);
+                AbstractSessionListener_Base.LOG.error("JMSException", e);
                 errorMsg = "error";
             } catch (final EFapsException e) {
-                AbstractContextListener_Base.LOG.error("EFapsException", e);
+                AbstractSessionListener_Base.LOG.error("EFapsException", e);
                 errorMsg = "error";
             } catch (final JAXBException e) {
-                AbstractContextListener_Base.LOG.error("JAXBException", e);
+                AbstractSessionListener_Base.LOG.error("JAXBException", e);
                 errorMsg = "error";
             } finally {
                 try {
@@ -148,16 +142,16 @@ public abstract class AbstractContextListener_Base
                         Context.rollback();
                     }
                 } catch (final EFapsException e) {
-                    AbstractContextListener_Base.LOG.error("EFapsException", e);
+                    AbstractSessionListener_Base.LOG.error("EFapsException", e);
                 }
                 try {
-                    AbstractContextListener_Base.LOG.debug("finished with Message: {}", _msg.getJMSMessageID());
+                    AbstractSessionListener_Base.LOG.debug("finished with Message: {}", _msg.getJMSMessageID());
                 } catch (final JMSException e) {
-                    AbstractContextListener_Base.LOG.error("JMSException", e);
+                    AbstractSessionListener_Base.LOG.error("JMSException", e);
                 }
             }
         } catch (final Throwable e) {
-            AbstractContextListener_Base.LOG.error("Unexpected exception!!!!!!!!", e);
+            AbstractSessionListener_Base.LOG.error("Unexpected exception!!!!!!!!", e);
             errorMsg = "unexpected exception";
         }
 
@@ -166,7 +160,7 @@ public abstract class AbstractContextListener_Base
         } else {
             respondError(_msg, errorMsg);
         }
-        AbstractContextListener_Base.LOG.debug(
+        AbstractSessionListener_Base.LOG.debug(
                         "responded for Messgage with Sessionkey '{}' and errorMsg '{}' on Msg {}", new Object[] {
                                         sessionKey, errorMsg, _msg });
     }
@@ -181,11 +175,11 @@ public abstract class AbstractContextListener_Base
                 final JmsDefinition def = JmsHandler.getJmsDefinition(name);
                 final TextMessage msg = def.getSession().createTextMessage();
                 msg.setJMSCorrelationID(_msg.getJMSCorrelationID());
-                msg.setStringProperty(AbstractContextListener_Base.ERRORCODE_PROPNAME, _errorCode);
+                msg.setStringProperty(AbstractSessionListener_Base.ERRORCODE_PROPNAME, _errorCode);
                 def.getMessageProducer().send(msg);
             }
         } catch (final JMSException e) {
-            AbstractContextListener_Base.LOG.error("JMSException", e);
+            AbstractSessionListener_Base.LOG.error("JMSException", e);
         }
     }
 
@@ -203,7 +197,7 @@ public abstract class AbstractContextListener_Base
                     Message msg;
                     if (_object != null && _object instanceof File) {
                         msg = def.getSession().createBytesMessage();
-                        msg.setStringProperty(AbstractContextListener_Base.FILENAME_PROPNAME,
+                        msg.setStringProperty(AbstractSessionListener_Base.FILENAME_PROPNAME,
                                         ((File) _object).getName());
                         respondSessionBytestMessage((BytesMessage) msg, _object);
                     } else {
@@ -211,25 +205,22 @@ public abstract class AbstractContextListener_Base
                         if (_sessionKey == null && _object != null) {
                             respondSessionTextMessage((TextMessage) msg, _object);
                         } else {
-                            msg.setStringProperty(AbstractContextListener_Base.SESSIONKEY_PROPNAME, _sessionKey);
+                            msg.setStringProperty(AbstractSessionListener_Base.SESSIONKEY_PROPNAME, _sessionKey);
                         }
                     }
                     msg.setJMSCorrelationID(_msg.getJMSCorrelationID());
-                    AbstractContextListener_Base.LOG.debug("Using CorrelationID '{}' for sending Message: {}",
+                    AbstractSessionListener_Base.LOG.debug("Using CorrelationID '{}' for sending Message: {}",
                                     msg.getJMSCorrelationID(), msg);
                     def.getMessageProducer().send(msg);
                 }
             }
         } catch (final Throwable e) {
-            AbstractContextListener_Base.LOG.error("Throwable", e);
+            AbstractSessionListener_Base.LOG.error("Throwable", e);
             respondError(_msg, "Throwable");
         }
     }
 
-    protected Class<?>[] getNoLoginClasses()
-    {
-        return new Class[] { Login.class, DBPropertiesAction.class, SyncAction.class };
-    }
+
 
     protected abstract Object onSessionMessage(final Message _msg);
 

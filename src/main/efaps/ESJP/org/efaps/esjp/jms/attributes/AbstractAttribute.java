@@ -27,6 +27,7 @@ import java.util.Set;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -44,7 +45,8 @@ public abstract class AbstractAttribute<T>
     /**
      * The set of restrictions for this Attribute.
      */
-    @XmlElement
+    @XmlElementWrapper(name = "attrSettings")
+    @XmlElement(name = "setting")
     private final Set<AttrSetting> attrSettings = new HashSet<AttrSetting>();
 
     /**
