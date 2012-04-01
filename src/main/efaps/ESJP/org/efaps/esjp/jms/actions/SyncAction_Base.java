@@ -86,6 +86,7 @@ public abstract class SyncAction_Base
                 final Update update;
                 final QueryBuilder queryBldr = new QueryBuilder(CIAdminCommon.GeneralInstance.uuid);
                 queryBldr.addWhereAttrEqValue(CIAdminCommon.GeneralInstance.ExchangeID, exChgIds[1]);
+                queryBldr.addWhereAttrEqValue(CIAdminCommon.GeneralInstance.ExchangeSystemID, exChgIds[0]);
                 final MultiPrintQuery multi = queryBldr.getPrint();
                 multi.addAttribute(CIAdminCommon.GeneralInstance.InstanceID,
                                 CIAdminCommon.GeneralInstance.InstanceTypeID);
