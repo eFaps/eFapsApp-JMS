@@ -81,14 +81,11 @@ public abstract class SyncAction_Base
             if (typeAnno != null) {
                 final Map<Attribute, IAttribute<?>> attributes = getAttributes(object, null);
 
-                final String syncids = object.getSyncid();
-                final String masterIdStr = syncids.split(":")[0];
-                final String mGenIdStr = masterIdStr.split("\\.")[1];
-                final Long mGenId = Long.valueOf(mGenIdStr);
+                final Long[] exChgIds = getExchangeIds(object);
 
                 final Update update;
                 final QueryBuilder queryBldr = new QueryBuilder(CIAdminCommon.GeneralInstance.uuid);
-                queryBldr.addWhereAttrEqValue(CIAdminCommon.GeneralInstance.ExchangeID, mGenId);
+                queryBldr.addWhereAttrEqValue(CIAdminCommon.GeneralInstance.ExchangeID, exChgIds[1]);
                 final MultiPrintQuery multi = queryBldr.getPrint();
                 multi.addAttribute(CIAdminCommon.GeneralInstance.InstanceID,
                                 CIAdminCommon.GeneralInstance.InstanceTypeID);
@@ -102,12 +99,12 @@ public abstract class SyncAction_Base
 
                     // if there is another result something is wrong
                     if (multi.next()) {
-                        throw new EFapsException(this.getClass(), "multipleResults4SyncId", syncids);
+                        throw new EFapsException(this.getClass(), "multipleResults4SyncId", object.getSyncid());
                     }
                     // check if the given Type from the ScynAction is the same
                     // type returned from the Query
                     if (!updateinst.getType().getUUID().equals(UUID.fromString(typeAnno.uuid()))) {
-                        throw new EFapsException(this.getClass(), "differentTypes", syncids);
+                        throw new EFapsException(this.getClass(), "differentTypes", object.getSyncid());
                     }
 
                     if (checkSettings4update(attributes) && validate4update(updateinst, attributes)) {
@@ -118,7 +115,7 @@ public abstract class SyncAction_Base
                     }
                     // insert
                 } else {
-                    update = new Insert(UUID.fromString(typeAnno.uuid())).setExchangeIds(new Long(0), mGenId);
+                    update = new Insert(UUID.fromString(typeAnno.uuid())).setExchangeIds(exChgIds[0], exChgIds[1]);
                     add4insert(update, attributes);
                     update.execute();
                     object.setOid(update.getInstance().getOid());
@@ -127,6 +124,28 @@ public abstract class SyncAction_Base
             }
         }
         return this;
+    }
+
+    /**
+     * Evaluate the exchangeid.<br/>
+     * <b>Must return an array with to longs.!</b>
+     *
+     * @param _object object the exchangeid must be read from
+     * @return long array, [exchangeSystemId, exchangeId]
+     * @throws EFapsException on error
+     */
+    protected Long[] getExchangeIds(final AbstractObject _object)
+        throws EFapsException
+    {
+        final Long[] ret = new Long[2];
+        final String syncids = _object.getSyncid();
+        final String masterIdStr = syncids.split(":")[0];
+        final String[] mIdStr = masterIdStr.split("\\.");
+        final Long mGenId = Long.valueOf(mIdStr[1]);
+        final Long mSystemId = Long.valueOf(mIdStr[0]);
+        ret[0] = mSystemId;
+        ret[1] = mGenId;
+        return ret;
     }
 
     /**
@@ -145,7 +164,7 @@ public abstract class SyncAction_Base
 
         final Map<Attribute, IAttribute<?>> ret = new HashMap<Attribute, IAttribute<?>>();
 
-        final Method[] methods = _object.getClass().getDeclaredMethods();
+        final Method[] methods = _object.getClass().getMethods();
         for (final Method method : methods) {
             if (method.isAnnotationPresent(Attribute.class)) {
                 final Attribute attributeAnno = method.getAnnotation(Attribute.class);
@@ -352,7 +371,9 @@ public abstract class SyncAction_Base
         throws EFapsException
     {
         for (final Entry<Attribute, IAttribute<?>> entry : _attributes.entrySet()) {
-            _update.add(entry.getKey().name(), entry.getValue().getValue());
+            if (entry.getValue() != null) {
+                _update.add(entry.getKey().name(), entry.getValue().getValue());
+            }
         }
     }
 
@@ -368,7 +389,9 @@ public abstract class SyncAction_Base
         throws EFapsException
     {
         for (final Entry<Attribute, IAttribute<?>> entry : _attributes.entrySet()) {
-            _update.add(entry.getKey().name(), entry.getValue().getValue());
+            if (entry.getValue() != null) {
+                _update.add(entry.getKey().name(), entry.getValue().getValue());
+            }
         }
     }
 }
