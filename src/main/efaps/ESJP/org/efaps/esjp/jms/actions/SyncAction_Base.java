@@ -53,6 +53,7 @@ import org.efaps.esjp.jms.annotation.MethodType;
 import org.efaps.esjp.jms.annotation.Type;
 import org.efaps.esjp.jms.attributes.AttrSetting;
 import org.efaps.esjp.jms.attributes.IAttribute;
+import org.efaps.esjp.jms.attributes.LinkAttribute;
 import org.efaps.util.EFapsException;
 
 /**
@@ -81,27 +82,12 @@ public abstract class SyncAction_Base
             if (typeAnno != null) {
                 final Map<Attribute, IAttribute<?>> attributes = getAttributes(object, null);
 
-                final Long[] exChgIds = getExchangeIds(object);
+                final Long[] exChgIds = getExchangeIds(object.getSyncid());
+                final Instance updateinst = getInstance4ExchIds(exChgIds);
 
                 final Update update;
-                final QueryBuilder queryBldr = new QueryBuilder(CIAdminCommon.GeneralInstance.uuid);
-                queryBldr.addWhereAttrEqValue(CIAdminCommon.GeneralInstance.ExchangeID, exChgIds[1]);
-                queryBldr.addWhereAttrEqValue(CIAdminCommon.GeneralInstance.ExchangeSystemID, exChgIds[0]);
-                final MultiPrintQuery multi = queryBldr.getPrint();
-                multi.addAttribute(CIAdminCommon.GeneralInstance.InstanceID,
-                                CIAdminCommon.GeneralInstance.InstanceTypeID);
                 // update
-                if (multi.execute()) {
-                    multi.next();
-                    final Long instanceId = multi.<Long>getAttribute(CIAdminCommon.GeneralInstance.InstanceID);
-                    final Long instanceTypeId = multi.<Long>getAttribute(CIAdminCommon.GeneralInstance.InstanceTypeID);
-                    final Instance updateinst = Instance.get(org.efaps.admin.datamodel.Type.get(instanceTypeId),
-                                    instanceId);
-
-                    // if there is another result something is wrong
-                    if (multi.next()) {
-                        throw new EFapsException(this.getClass(), "multipleResults4SyncId", object.getSyncid());
-                    }
+                if (updateinst.isValid()) {
                     // check if the given Type from the ScynAction is the same
                     // type returned from the Query
                     if (!updateinst.getType().getUUID().equals(UUID.fromString(typeAnno.uuid()))) {
@@ -131,16 +117,15 @@ public abstract class SyncAction_Base
      * Evaluate the exchangeid.<br/>
      * <b>Must return an array with to longs.!</b>
      *
-     * @param _object object the exchangeid must be read from
+     * @param _syncid object the exchangeid must be read from
      * @return long array, [exchangeSystemId, exchangeId]
      * @throws EFapsException on error
      */
-    protected Long[] getExchangeIds(final AbstractObject _object)
+    protected Long[] getExchangeIds(final String _syncid)
         throws EFapsException
     {
         final Long[] ret = new Long[2];
-        final String syncids = _object.getSyncid();
-        final String masterIdStr = syncids.split(":")[0];
+        final String masterIdStr = _syncid.split(":")[0];
         final String[] mIdStr = masterIdStr.split("\\.");
         final Long mGenId = Long.valueOf(mIdStr[1]);
         final Long mSystemId = Long.valueOf(mIdStr[0]);
@@ -373,7 +358,13 @@ public abstract class SyncAction_Base
     {
         for (final Entry<Attribute, IAttribute<?>> entry : _attributes.entrySet()) {
             if (entry.getValue() != null) {
-                _update.add(entry.getKey().name(), entry.getValue().getValue());
+                Object value;
+                if (entry.getValue() instanceof LinkAttribute) {
+                    value = getLinkValue(entry.getValue());
+                } else {
+                    value = entry.getValue().getValue();
+                }
+                _update.add(entry.getKey().name(), value);
             }
         }
     }
@@ -391,8 +382,66 @@ public abstract class SyncAction_Base
     {
         for (final Entry<Attribute, IAttribute<?>> entry : _attributes.entrySet()) {
             if (entry.getValue() != null) {
-                _update.add(entry.getKey().name(), entry.getValue().getValue());
+                Object value;
+                if (entry.getValue() instanceof LinkAttribute) {
+                    value = getLinkValue(entry.getValue());
+                } else {
+                    value = entry.getValue().getValue();
+                }
+                _update.add(entry.getKey().name(), value);
             }
         }
+    }
+
+    /**
+     * @param _attribute IAttribute the link value is wanted for
+     * @return Object represting the link
+     * @throws EFapsException on error
+     */
+    protected Object getLinkValue(final IAttribute<?> _attribute)
+        throws EFapsException
+    {
+        Object ret = null;
+        final LinkAttribute attribute = (LinkAttribute) _attribute;
+        if (attribute.getValue().getOid() != null) {
+            ret = Instance.get(attribute.getValue().getOid()).getId();
+        } else {
+            final Long[] exChgIds = getExchangeIds(attribute.getValue().getSyncid());
+            ret = getInstance4ExchIds(exChgIds).getId();
+        }
+        return ret;
+    }
+
+    /**
+     * Get an instance for an ExchangeId array.
+     *
+     * @param _exChgIds array of a exchangeId
+     * @return Instance belonging to the given exchangeId Array
+     * @throws EFapsException on error
+     */
+    protected Instance getInstance4ExchIds(final Long[] _exChgIds)
+        throws EFapsException
+    {
+        Instance ret = Instance.get("oid");
+        final QueryBuilder queryBldr = new QueryBuilder(CIAdminCommon.GeneralInstance.uuid);
+        queryBldr.addWhereAttrEqValue(CIAdminCommon.GeneralInstance.ExchangeID, _exChgIds[1]);
+        queryBldr.addWhereAttrEqValue(CIAdminCommon.GeneralInstance.ExchangeSystemID, _exChgIds[0]);
+        final MultiPrintQuery multi = queryBldr.getPrint();
+        multi.addAttribute(CIAdminCommon.GeneralInstance.InstanceID,
+                        CIAdminCommon.GeneralInstance.InstanceTypeID);
+        // update
+        if (multi.execute()) {
+            multi.next();
+            final Long instanceId = multi.<Long>getAttribute(CIAdminCommon.GeneralInstance.InstanceID);
+            final Long instanceTypeId = multi.<Long>getAttribute(CIAdminCommon.GeneralInstance.InstanceTypeID);
+            ret = Instance.get(org.efaps.admin.datamodel.Type.get(instanceTypeId),
+                            instanceId);
+
+            // if there is another result something is wrong
+            if (multi.next()) {
+                throw new EFapsException(this.getClass(), "multipleResults4SyncId", _exChgIds[0], _exChgIds[1]);
+            }
+        }
+        return ret;
     }
 }
