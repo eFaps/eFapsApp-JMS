@@ -20,6 +20,10 @@
 
 package org.efaps.esjp.jms.msg.listener;
 
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 import javax.jms.JMSException;
 import javax.jms.Message;
 
@@ -53,7 +57,7 @@ public abstract class AbstractSecuredListener_Base
         try {
             AbstractSecuredListener_Base.LOG.debug("Recieved Message: {}", _msg.getJMSMessageID());
             try {
-                Context.begin(getUserName(), false);
+                Context.begin(getUserName(), getLocale(), getSessionAttributes(), null, null, false);
                 onContextMessage(_msg);
                 Context.commit();
             } catch (final EFapsException e) {
@@ -76,6 +80,22 @@ public abstract class AbstractSecuredListener_Base
             AbstractSecuredListener_Base.LOG.error("Unexpected exception!!!!!!!!", e);
 
         }
+    }
+
+    /**
+     * @return HashMap with SessiionAttributes
+     */
+    private Map<String, Object> getSessionAttributes()
+    {
+        return new HashMap<String, Object>();
+    }
+
+    /**
+     * @return Locale
+     */
+    protected Locale getLocale()
+    {
+        return null;
     }
 
     public abstract String getUserName();

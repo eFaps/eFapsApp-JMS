@@ -34,62 +34,52 @@ import javax.xml.bind.annotation.XmlType;
  * @version $Id$
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name = "attribute.linkobject")
-public class LinkObject
+@XmlType(name = "attribute.status")
+public class StatusAttribute
+    extends AbstractAttribute<Long>
 {
     /**
-     * Syncid of this Object. Only used for syncing.
+     * The actual value.
      */
-    @XmlAttribute(name = "syncid")
-    private String syncid;
+    @XmlAttribute
+    private Long value;
 
     /**
-     * OID of this Object.
+     * Standard Constructor.
      */
-    @XmlAttribute(name = "oid")
-    private String oid;
-
-    /**
-     * Getter method for the instance variable {@link #syncid}.
-     *
-     * @return value of instance variable {@link #syncid}
-     */
-    public String getSyncid()
+    public StatusAttribute()
     {
-        return this.syncid;
+        super();
     }
 
     /**
-     * Setter method for instance variable {@link #syncid}.
-     *
-     * @param _syncid value for instance variable {@link #syncid}
-     * @return this object instance
+     * Constructor setting the value.
+     * @param _value value for this attribute
      */
-    public LinkObject setSyncid(final String _syncid)
+    public StatusAttribute(final Long _value)
     {
-        this.syncid = _syncid;
-        return this;
+        super();
+        this.value = _value;
     }
 
     /**
-     * Getter method for the instance variable {@link #oid}.
+     * Getter method for the instance variable {@link #value}.
      *
-     * @return value of instance variable {@link #oid}
+     * @return value of instance variable {@link #value}
      */
-    public String getOid()
+    public Long getValue()
     {
-        return this.oid;
+        return this.value;
     }
 
     /**
-     * Setter method for instance variable {@link #oid}.
+     * Setter method for instance variable {@link #value}.
      *
-     * @param _oid value for instance variable {@link #oid}
-     * @return this object instance
+     * @param _value value for instance variable {@link #value}
      */
-    public LinkObject setOid(final String _oid)
+
+    public void setValue(final Object _value)
     {
-        this.oid = _oid;
-        return this;
+        this.value = (Long) _value;
     }
 }
