@@ -302,10 +302,10 @@ public abstract class SyncAction_Base
         for (final Entry<Attribute, IAttribute<?>> entry : _attributes.entrySet()) {
             print.addAttribute(entry.getKey().name());
         }
-        print.execute();
+        print.executeWithoutAccessCheck();
         for (final Entry<Attribute, IAttribute<?>> entry : _attributes.entrySet()) {
             final Object obj = print.getAttribute(entry.getKey().name());
-            if (obj.equals(entry.getValue().getValue())) {
+            if (obj != null && !obj.equals(entry.getValue().getValue())) {
                 ret = true;
                 break;
             }

@@ -21,10 +21,15 @@
 
 package org.efaps.esjp.jms.attributes;
 
+import java.util.UUID;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+
+import org.efaps.admin.datamodel.Status;
 
 
 /**
@@ -45,6 +50,19 @@ public class StatusAttribute
     private Long value;
 
     /**
+     * The key to the Status.
+     */
+    @XmlElement
+    private String statusKey;
+
+
+    /**
+     * The UUID of the Status Type.
+     */
+    @XmlElement
+    private UUID statusUUID;
+
+    /**
      * Standard Constructor.
      */
     public StatusAttribute()
@@ -63,13 +81,75 @@ public class StatusAttribute
     }
 
     /**
+     * Constructor setting the value.
+     * @param _statusUUID UUID of the Status Type
+     * @param _statusKey  key of the Status
+     */
+    public StatusAttribute(final UUID _statusUUID,
+                           final String _statusKey)
+    {
+        super();
+        this.value = Long.valueOf(0);
+        this.statusUUID = _statusUUID;
+        this.statusKey = _statusKey;
+    }
+
+    /**
+     * Getter method for the instance variable {@link #statusKey}.
+     *
+     * @return value of instance variable {@link #statusKey}
+     */
+    public String getStatusKey()
+    {
+        return this.statusKey;
+    }
+
+    /**
+     * Setter method for instance variable {@link #statusKey}.
+     *
+     * @param _statusKey value for instance variable {@link #statusKey}
+     */
+    public void setStatusKey(final String _statusKey)
+    {
+        this.statusKey = _statusKey;
+    }
+
+    /**
+     * Getter method for the instance variable {@link #statusUUID}.
+     *
+     * @return value of instance variable {@link #statusUUID}
+     */
+    public UUID getStatusUUID()
+    {
+        return this.statusUUID;
+    }
+
+    /**
+     * Setter method for instance variable {@link #statusUUID}.
+     *
+     * @param _statusUUID value for instance variable {@link #statusUUID}
+     */
+
+    public void setStatusUUID(final UUID _statusUUID)
+    {
+        this.statusUUID = _statusUUID;
+    }
+
+    /**
      * Getter method for the instance variable {@link #value}.
      *
      * @return value of instance variable {@link #value}
      */
     public Long getValue()
     {
-        return this.value;
+        Long ret = this.value;
+        if (ret == 0) {
+            final Status status = Status.find(this.statusUUID, this.statusKey);
+            if (status != null) {
+                ret = status.getId();
+            }
+        }
+        return ret;
     }
 
     /**
@@ -77,7 +157,6 @@ public class StatusAttribute
      *
      * @param _value value for instance variable {@link #value}
      */
-
     public void setValue(final Object _value)
     {
         this.value = (Long) _value;
