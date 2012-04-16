@@ -88,6 +88,7 @@ public abstract class SyncAction_Base
                 final Update update;
                 // update
                 if (updateinst.isValid()) {
+                    object.setOid(updateinst.getOid());
                     // check if the given Type from the ScynAction is the same
                     // type returned from the Query
                     if (!updateinst.getType().getUUID().equals(UUID.fromString(typeAnno.uuid()))) {
@@ -98,7 +99,6 @@ public abstract class SyncAction_Base
                         update = new Update(updateinst);
                         add4update(update, attributes);
                         update.execute();
-                        object.setOid(update.getInstance().getOid());
                     }
                     // insert
                 } else {
