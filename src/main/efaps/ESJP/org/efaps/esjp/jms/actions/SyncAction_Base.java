@@ -186,6 +186,7 @@ public abstract class SyncAction_Base
      */
     // TODO what must be done if a classification exists in the target but not
     // in the syncobject
+    @SuppressWarnings("unchecked")
     protected void syncClassifcation(final AbstractObject _object)
         throws EFapsException
     {
@@ -199,14 +200,30 @@ public abstract class SyncAction_Base
                                 .oid();
                 print.addSelect(selBldr);
                 print.execute();
-                final Instance classInst = Instance.get(print.<String>getSelect(selBldr));
-                // update
-                if (classInst.isValid()) {
-                    classification.setOid(classInst.getOid());
-                    updateClassification(_object, classification);
-                    // insert
-                } else {
-                    insertClassification(_object, classification);
+                final Object clazz = print.getSelect(selBldr);
+                if (clazz instanceof String) {
+                    final Instance classInst = Instance.get((String) clazz);
+                    // update
+                    if (classInst.isValid()) {
+                        classification.setOid(classInst.getOid());
+                        updateClassification(_object, classification);
+                        // insert
+                    } else {
+                        insertClassification(_object, classification);
+                    }
+                } else if (clazz instanceof List) {
+                    for (final String cl : (List<String>) clazz) {
+                        final Instance classInst = Instance.get(cl);
+                        // update
+                        if (classInst.isValid()) {
+                            classification.setOid(classInst.getOid());
+                            updateClassification(_object, classification);
+                            // insert
+                        } else {
+                            insertClassification(_object, classification);
+                        }
+                    }
+
                 }
             }
         }
