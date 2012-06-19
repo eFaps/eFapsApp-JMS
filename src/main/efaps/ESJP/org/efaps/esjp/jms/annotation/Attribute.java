@@ -48,4 +48,9 @@ public @interface Attribute
      * The type of the method.
      */
     MethodType method();
+
+    /**
+     * Profiles this attribute belongs to.
+     */
+    String[] profiles() default { "" };
 }
