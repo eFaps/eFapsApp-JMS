@@ -223,7 +223,8 @@ public abstract class SyncAction_Base
                             insertClassification(_object, classification);
                         }
                     }
-
+                } else {
+                    insertClassification(_object, classification);
                 }
             }
         }
@@ -259,8 +260,30 @@ public abstract class SyncAction_Base
             final Class<?> clss = clazz2class.get(clazzTmp);
             clazzTmp = (Classification) clazzTmp.getParentClassification();
             if (clazzTmp != null) {
-                clazzes.add(clazzTmp);
-                clazz2class.put(clazzTmp, clss.getSuperclass());
+                final PrintQuery print = new PrintQuery(objectInst);
+                final SelectBuilder selClass = new SelectBuilder().clazz(clazzTmp.getName()).oid();
+                print.addSelect(selClass);
+                print.execute();
+                final Object clazzCheck = print.getSelect(selClass);
+                boolean exist = false;
+                if (clazzCheck instanceof String) {
+                    final Instance classInst = Instance.get((String) clazzCheck);
+                    // update
+                    if (classInst.isValid()) {
+                        exist = true;
+                    }
+                } else if (clazzCheck instanceof List) {
+                    for (final String cl : (List<String>) clazzCheck) {
+                        final Instance classInst = Instance.get(cl);
+                        if (classInst.isValid()) {
+                            exist = true;
+                        }
+                    }
+                }
+                if (!exist) {
+                    clazzes.add(clazzTmp);
+                    clazz2class.put(clazzTmp, clss.getSuperclass());
+                }
             }
         }
         Collections.reverse(clazzes);
