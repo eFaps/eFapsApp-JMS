@@ -33,7 +33,7 @@
             <!-- columns -->
             <column name="TYPEID"       not-null="true" type="INTEGER"/>
             <column name="JMSID"        not-null="true" type="INTEGER"/>
-            <column name="CONTENT"                      type="STRING_SHORT"     length="4048"/>
+            <column name="CONTENT"                      type="STRING_SHORT"     length="4000"/>
             <column name="CREATOR"      not-null="true" type="INTEGER"/>
             <column name="CREATED"      not-null="true" type="DATETIME"/>
             <column name="MODIFIER"     not-null="true" type="INTEGER"/>
