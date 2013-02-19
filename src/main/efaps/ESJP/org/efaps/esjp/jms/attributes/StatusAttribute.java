@@ -30,6 +30,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.efaps.admin.datamodel.Status;
+import org.efaps.util.cache.CacheReloadException;
 
 
 /**
@@ -144,7 +145,13 @@ public class StatusAttribute
     {
         Long ret = this.value;
         if (ret == 0) {
-            final Status status = Status.find(this.statusUUID, this.statusKey);
+            Status status = null;
+            try {
+                status = Status.find(this.statusUUID, this.statusKey);
+            } catch (final CacheReloadException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             if (status != null) {
                 ret = status.getId();
             }
