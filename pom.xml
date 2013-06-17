@@ -114,6 +114,7 @@
     <!-- ************************************************************************
         * Project itself ************************************************************************* -->
     <build>
+        <sourceDirectory>src/main/efaps/ESJP</sourceDirectory>
         <plugins>
             <!--
                 eFaps plugin
@@ -147,25 +148,24 @@
                 </dependencies>
             </plugin>
             <plugin>
-                <groupId>com.sun.tools.jxc.maven2</groupId>
-                <artifactId>maven-jaxb-schemagen-plugin</artifactId>
-                <version>1.2</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>1.5</version>
                 <executions>
                     <execution>
-                        <phase>generate-resources</phase>
+                        <id>schemagen</id>
                         <goals>
-                            <goal>generate</goal>
+                            <goal>schemagen</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <project>
-                        ${project}
-                    </project>
-                    <destdir>${project.build.directory}/generated-resources/schemas</destdir>
-                    <srcdir>src/main/efaps/ESJP/org/efaps/esjp/jms</srcdir>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
                     <excludes>
                         <exclude>**/msg/**</exclude>
+                        <exclude>**/ci/**</exclude>
                     </excludes>
                     <verbose>true</verbose>
                 </configuration>
