@@ -145,7 +145,7 @@ public class AbstractJmsTest
         RunLevel.init("shell");
         RunLevel.execute();
         Context.rollback();
-        AppAccessHandler.init("jmsTest", new HashSet<String>());
+        AppAccessHandler.init("jmsTest", new HashSet<UUID>());
     }
 
     @AfterTest(dependsOnGroups = "cleanup")
