@@ -22,6 +22,7 @@ package org.efaps.jms.test;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.UUID;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
