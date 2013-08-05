@@ -37,6 +37,7 @@ public interface IAction
      * send as part of the response.
      *
      * @throws EFapsException on error
+     * @return the Object that will be part of the repsonse
      */
     Object execute() throws EFapsException;
 
