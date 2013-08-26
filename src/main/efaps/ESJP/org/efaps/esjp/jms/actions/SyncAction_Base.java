@@ -55,6 +55,8 @@ import org.efaps.esjp.jms.attributes.AttrSetting;
 import org.efaps.esjp.jms.attributes.IAttribute;
 import org.efaps.esjp.jms.attributes.LinkAttribute;
 import org.efaps.util.EFapsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO comment!
@@ -69,6 +71,11 @@ import org.efaps.util.EFapsException;
 public abstract class SyncAction_Base
     extends AbstractAction
 {
+
+    /**
+     * Logger for this class.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(SyncAction_Base.class);
 
     /**
      * {@inheritDoc}
@@ -104,8 +111,21 @@ public abstract class SyncAction_Base
                 } else {
                     update = new Insert(UUID.fromString(typeAnno.uuid())).setExchangeIds(exChgIds[0], exChgIds[1]);
                     add4insert(update, attributes);
-                    update.execute();
-                    object.setOid(update.getInstance().getOid());
+                    final Map<String, Object> map = validate4insert(updateinst, attributes);
+                    if (map.isEmpty()) {
+                        update.execute();
+                        object.setOid(update.getInstance().getOid());
+                    } else {
+                        final StringBuilder str = new StringBuilder();
+                        for (final Entry<String, Object> entry : map.entrySet()) {
+                            str.append(entry.getKey())
+                                .append("=")
+                                .append(entry.getValue())
+                                .append(" - ");
+                        }
+                        LOG.error("The type '{}' with attributes: '{}', cannot be created",
+                                        update.getInstance().getType().getName(), str.toString());
+                    }
                 }
                 syncClassifcation(object);
             }
@@ -351,6 +371,40 @@ public abstract class SyncAction_Base
             }
         }
         return ret;
+    }
+
+    /**
+     * Validate the given attributes for insert.
+     *
+     * @param _updateinst instance to be updated
+     * @param _attributes attributes to be checked
+     * @return true if update must be done, else false
+     * @throws EFapsException on error
+     */
+    protected Map<String, Object> validate4insert(final Instance _updateinst,
+                                      final Map<Attribute, IAttribute<?>> _attributes)
+        throws EFapsException
+    {
+        Map<String, Object> map = new HashMap<String, Object>();
+        boolean valid = true;
+        for (final Entry<Attribute, IAttribute<?>> entry : _attributes.entrySet()) {
+            if (entry.getValue() != null) {
+                Object value;
+                if (entry.getValue() instanceof LinkAttribute) {
+                    value = getLinkValue(entry.getValue());
+                } else {
+                    value = entry.getValue().getValue();
+                }
+                if (value != null && value instanceof Long && ((Long) value) == 0) {
+                    valid = false;
+                }
+                map.put(entry.getKey().name(), value);
+            }
+        }
+        if (valid) {
+            map = new HashMap<String, Object>();
+        }
+        return map;
     }
 
     /**
