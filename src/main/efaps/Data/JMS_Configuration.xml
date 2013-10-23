@@ -19,7 +19,9 @@
   Last Changed:    $Date: 2013-06-24 13:23:52 -0500 (lun, 24 jun 2013) $
   Last Changed By: $Author: jorge.cueva@moxter.net $
 
---><common-systemconfiguration xmlns="http://www.efaps.org/xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.efaps.org/xsd http://www.efaps.org/xsd/eFaps_1.0.xsd">
+--><common-systemconfiguration xmlns="http://www.efaps.org/xsd" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.efaps.org/xsd http://www.efaps.org/xsd/eFaps_1.0.xsd">
 
     <uuid>65b6a1a8-c979-4471-b175-774593f1acd7</uuid>
     <file-application>eFapsApp-jms</file-application>
