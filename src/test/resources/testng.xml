@@ -6,4 +6,10 @@
             <class name="org.efaps.jms.test.Contacts"></class>
         </classes>
     </test>
+    <test name="CITests">
+        <parameter name="baseFolder" value="../../../main/efaps"></parameter>
+        <classes>
+            <class name="org.efaps.tests.ci.form.FormValidation"></class>
+        </classes>
+    </test>
 </suite>
