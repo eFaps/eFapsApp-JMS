@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2015 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev$
- * Last Changed:    $Date$
- * Last Changed By: $Author$
  */
 
 package org.efaps.esjp.jms.msg.listener;
@@ -27,7 +24,7 @@ import java.util.Map;
 import javax.jms.JMSException;
 import javax.jms.Message;
 
-import org.efaps.admin.program.esjp.EFapsRevision;
+import org.efaps.admin.program.esjp.EFapsApplication;
 import org.efaps.admin.program.esjp.EFapsUUID;
 import org.efaps.db.Context;
 import org.efaps.util.EFapsException;
@@ -38,10 +35,9 @@ import org.slf4j.LoggerFactory;
  * TODO comment!
  *
  * @author The eFaps Team
- * @version $Id$
  */
 @EFapsUUID("b343b42a-5c6c-493c-83ae-b18d36376e91")
-@EFapsRevision("$Rev$")
+@EFapsApplication("eFapsApp-JMS")
 public abstract class AbstractSecuredListener_Base
     extends AbstractListener
 {
@@ -57,7 +53,8 @@ public abstract class AbstractSecuredListener_Base
         try {
             AbstractSecuredListener_Base.LOG.debug("Recieved Message: {}", _msg.getJMSMessageID());
             try {
-                Context.begin(getUserName(), getLocale(), getSessionAttributes(), null, null, false);
+                Context.begin(getUserName(), getLocale(), getSessionAttributes(), null, null,
+                                Context.Inheritance.Local);
                 onContextMessage(_msg);
                 Context.commit();
             } catch (final EFapsException e) {

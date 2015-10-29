@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 - 2011 The eFaps Team
+ * Copyright 2003 - 2015 The eFaps Team
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Revision:        $Rev: 7438 $
- * Last Changed:    $Date: 2012-03-27 22:40:10 -0500 (Tue, 27 Mar 2012) $
- * Last Changed By: $Author: jan@moxter.net $
  */
 
 package org.efaps.esjp.jms.msg.listener;
@@ -35,7 +32,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
-import org.efaps.admin.program.esjp.EFapsRevision;
+import org.efaps.admin.program.esjp.EFapsApplication;
 import org.efaps.admin.program.esjp.EFapsUUID;
 import org.efaps.db.Context;
 import org.efaps.esjp.jms.actions.INoUserContextRequired;
@@ -53,10 +50,9 @@ import org.slf4j.LoggerFactory;
  * the subclasses.
  *
  * @author The eFaps Team
- * @version $Id: AbstractContextListener_Base.java 7438 2012-03-28 03:40:10Z jan@moxter.net $
  */
 @EFapsUUID("7e3f555b-a293-47d7-be15-2f4fc80eecbb")
-@EFapsRevision("$Rev: 7438 $")
+@EFapsApplication("eFapsApp-JMS")
 public abstract class AbstractSessionListener_Base
     extends AbstractListener
 {
@@ -93,7 +89,7 @@ public abstract class AbstractSessionListener_Base
                     // open a context, because the classes are loaded from the eFaspClassLoader and this loader
                     // needs a database connection
                     if (!Context.isTMActive()) {
-                        Context.begin(null, false);
+                        Context.begin(null, Context.Inheritance.Local);
                     }
                     // to ensure that the inner class is loaded
                     ERROCODE.SESSIONTIMEOUT.name();
