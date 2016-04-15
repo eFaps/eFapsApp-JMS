@@ -3,6 +3,7 @@
 <suite name="org.efaps.test.jms">
     <test name="CITests">
         <parameter name="baseFolder" value="../../../main/efaps"></parameter>
+        <parameter name="application" value="eFapsApp-JMS"/>
          <packages>
             <package name="org.efaps.tests.ci.*"></package>
         </packages>
